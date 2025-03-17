@@ -1,0 +1,11 @@
+{
+    "std_user":"standard_user",
+    "password": "secret_sauce",
+    "isProductAvailable": "Sauce Labs Bike Light",
+    "addProductCart":"Sauce Labs Bike Light",
+    "addProductCart1" : "Sauce Labs Backpack",
+    "addProductCart2" : "Sauce Labs Bolt T-Shirt",
+    "addProductCart3" : "Test.allTheThings() T-Shirt (Red)",
+    "firstProduct": "Sauce Labs Fleece Jacket",
+    "lastProduct" : "Sauce Labs Onesie"
+}
