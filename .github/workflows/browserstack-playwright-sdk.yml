@@ -33,7 +33,7 @@ jobs:
         run: npx playwright install --with-deps
         
       - name: 'Running test on BrowserStack'  # Invokes the actual test script that would run on BrowserStack browsers
-        run: npx playwright test  # See sample test script above
+        run: npm run browserstack-playwright  # See sample test script above
 
       - name: 'BrowserStackLocal Stop'  # Terminating the BrowserStackLocal tunnel connection
         uses: browserstack/github-actions/setup-local@master
