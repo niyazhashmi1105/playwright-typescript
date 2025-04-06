@@ -10,3 +10,8 @@ local.log
 *.obs*
 allure-report/
 allure-results/
+.env
+browserstack.err
+browser*.json
+*.log
+playwright-browserstack*.json  
