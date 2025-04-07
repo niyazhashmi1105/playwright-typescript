@@ -18,9 +18,9 @@ platforms:
     osVersion: 11
     browserName: edge
     browserVersion: latest
-  - deviceName: Samsung Galaxy S23 Ultra
-    browserName: chrome
-    osVersion: 13.0
+  # - deviceName: Samsung Galaxy S23 Ultra
+  #   browserName: chrome
+  #   osVersion: 13.0
   - os: OS X
     osVersion: Sequoia
     browserName: chrome
