@@ -15,3 +15,4 @@ browserstack.err
 browser*.json
 *.log
 playwright-browserstack*.json  
+.DS_Store
