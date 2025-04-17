@@ -1,5 +1,6 @@
 name: 'Playwright BrowserStack WEB E2E Tests'
-on: [push]
+on:
+  workflow_dispatch:
 jobs:
   ubuntu-job:
     name: 'BrowserStack Test on Ubuntu'
