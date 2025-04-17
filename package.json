@@ -5,6 +5,7 @@
   "scripts": {
     "chrome:ui": "npx playwright test --project chromium --headed end2end.spec.ts",
     "all:ui": "npx playwright test --headed end2end.spec.ts",
+    "all:headless": "npx playwright test end2end.spec.ts",
     "postinstall": "npm update browserstack-node-sdk",
     "chrome:ui-browserstack": "npx browserstack-node-sdk playwright test --project chromium --headed end2end.spec.ts",
     "allure:generate": "allure generate allure-results -o allure-report --clean",
