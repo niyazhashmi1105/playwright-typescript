@@ -1,4 +1,29 @@
 import { defineConfig, devices } from '@playwright/test';
+import { OrtoniReportConfig } from "ortoni-report";
+
+const reportConfig: OrtoniReportConfig = {
+  open: process.env.CI ? "never" : "always", // default to never
+  folderPath: "my-report",
+  filename: "index.html",
+  logo:"logo.{png, jpg}",
+  title: "Ortoni Test Report",
+  showProject: false,
+  projectName: "Ortoni-Report",
+  testType: "e2e",
+  authorName: "Niyaz",
+  base64Image: false,
+  stdIO: false,
+  preferredTheme: "light",
+
+  meta: {
+    project: "Playwright",
+    version: "3.0.0",
+    description: "Playwright test report",
+    testCycle: "1",
+    release: "1.0.0",
+    platform: "MacOS",
+  },
+};
 
 /**
  * Read environment variables from file.
@@ -15,7 +40,7 @@ export default defineConfig({
   testDir: './tests',
   timeout: 60 * 1000,
   /* Run tests in files in parallel */
-  fullyParallel: false,
+  fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
@@ -30,6 +55,7 @@ export default defineConfig({
     suiteTitle:true
   }],
   ['./utils/html-reporter.ts'],
+  ["ortoni-report", reportConfig],
 ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -38,8 +64,8 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    screenshot:'only-on-failure',
-    video:"off"
+    screenshot:'on',
+    video:"on"
   },
 
   /* Configure projects for major browsers */

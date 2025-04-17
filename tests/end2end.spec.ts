@@ -38,7 +38,7 @@ test('Add the product into the cart and assert if it is added or not', async ({ 
 test('Check the first and last product before applying filter and after applying the filter', async ({ homePage, page }) => {
     await test.step('Check the first and last product before and after applying filter', async () => {
     await homePage.addProductToCart(testData.addProductCart, '#add-to-cart-sauce-labs-bike-light');
-    expect(page.locator('#remove-sauce-labs-bike-light123')).toBeVisible();
+    expect(page.locator('#remove-sauce-labs-bike-light')).toBeVisible();
     expect(await page.locator('.shopping_cart_link > span').textContent()).toBe('1');
     await homePage.click("//button[text()='Remove']");
 
@@ -76,9 +76,9 @@ test('Add to products into the cart', async ({ homePage, cartPage, page }) => {
   
     
     // filling up user details
-    await cartPage.fillDetails('#first-name', "TestFirstName");
-    await cartPage.fillDetails('#last-name', "TestLastName");
-    await cartPage.fillDetails('#postal-code', "TestPincode");
+    await cartPage.fill('#first-name', "TestFirstName");
+    await cartPage.fill('#last-name', "TestLastName");
+    await cartPage.fill('#postal-code', "TestPincode");
     await cartPage.click('#continue');
     
 
