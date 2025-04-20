@@ -1,23 +1,17 @@
-import type { Page, Locator } from '@playwright/test';
-import HTMLReporter  from '../utils/html-reporter';
+import { Page, Locator } from '@playwright/test';
 
 export class BasePage {
-    private readonly selectOptions: Locator;
-    private readonly filterOptions: Locator;
-    public readonly reporter: HTMLReporter;
+    protected page: Page;
+    private selectOptions: Locator;
+    private filterOptions: Locator;
 
-    constructor(public readonly page: Page) {
+    constructor(page: Page) {
+        this.page = page;
         this.selectOptions = this.page.locator(".product_sort_container option");
         this.filterOptions = this.page.locator(".product_sort_container");
-        
     }
 
-    async navigateToURL(url: string) {
-        // this.reporter.trackPageAction({
-        //     type: 'navigate',
-        //     value: url,
-        //     timestamp: new Date().toISOString()
-        // });
+    async navigateToURL(url: string): Promise<void> {
         await this.page.goto(url);
     }
 
@@ -36,23 +30,11 @@ export class BasePage {
         return null;
     }
 
-    async click(selector: string, description?: string) {
-        // this.reporter.trackPageAction({
-        //     type: 'click',
-        //     selector,
-        //     description,
-        //     timestamp: new Date().toISOString()
-        // });
+    async click(selector: string, description?: string): Promise<void> {
         await this.page.click(selector);
     }
 
-    async fill(selector: string, value: string) {
-        // this.reporter.trackPageAction({
-        //     type: 'fill',
-        //     selector,
-        //     value,
-        //     timestamp: new Date().toISOString()
-        // });
+    async fill(selector: string, value: string): Promise<void> {
         await this.page.fill(selector, value);
     }
 
@@ -64,13 +46,7 @@ export class BasePage {
         return await this.page.locator(selector).isVisible();
     }
 
-    async selectOption(selector: string, value: string) {
-        // this.reporter.trackPageAction({
-        //     type: 'select',
-        //     selector,
-        //     value,
-        //     timestamp: new Date().toISOString()
-        // });
+    async selectOption(selector: string, value: string): Promise<void> {
         await this.page.selectOption(selector, value);
     }
 }

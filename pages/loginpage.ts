@@ -1,13 +1,13 @@
 // filepath: /Users/mdniyazhashmi/playwright-typescript/pages/loginpage.ts
+import { Page } from '@playwright/test';
 import { BasePage } from './basepage';
-import type { Page } from '@playwright/test';
 
 export class LoginPage extends BasePage {
-    private readonly userName: string;
-    private readonly password: string;
-    private readonly loginBtn: string;
+    private userName: string;
+    private password: string;
+    private loginBtn: string;
 
-    constructor(public readonly page: Page) {
+    constructor(page: Page) {
         super(page);
         this.userName = "#user-name";
         this.password = "#password";

@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { OrtoniReportConfig } from "ortoni-report";
-import PrometheusReporter from './utils/prometheus-reporter';
+import path from 'path';
 
 const reportConfig: OrtoniReportConfig = {
   open: process.env.CI ? "never" : "never", // default to never
@@ -31,7 +31,6 @@ const reportConfig: OrtoniReportConfig = {
  * https://github.com/motdotla/dotenv
  */
  import dotenv from 'dotenv';
- import path from 'path';
  dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 /**
@@ -56,10 +55,7 @@ export default defineConfig({
       detail: true,
       suiteTitle: true
     }],
-    ['./utils/prometheus-reporter.ts', {
-      port: process.env.METRICS_PORT || 9323,
-      enabled: true
-    }],
+    ['./utils/prometheus-reporter.ts'],
     ["ortoni-report", reportConfig],
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */

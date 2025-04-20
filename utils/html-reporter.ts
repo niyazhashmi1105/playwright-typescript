@@ -1,66 +1,113 @@
-import {
-    FullConfig,
-    FullResult,
-    Reporter,
-    Suite,
-    TestCase,
-    TestResult,
-    TestStep
-} from '@playwright/test/reporter';
 import fs from 'fs';
 import path from 'path';
+import { FullConfig, TestCase, TestResult } from '@playwright/test/reporter';
 
-interface ActionInfo {
-    type: string;
+interface ReportSummary {
+    total: number;
+    passed: number;
+    failed: number;
+    skipped: number;
+}
+
+interface BrowserInfo {
+    name: string;
+    version: string;
+    platform: string;
+    headless?: string;
+}
+
+interface Action {
+    type: 'click' | 'fill' | 'navigate' | 'select';
     selector?: string;
     value?: string;
     description?: string;
     timestamp: string;
 }
 
-export default class HTMLReporter implements Reporter {
-    
-    private report: any = {
-        suites: [],
-        summary: {
-            total: 0,
-            passed: 0,
-            failed: 0,
-            skipped: 0
-        },
-        browserInfo: {
-            name: '',
-            version: '',
-            platform: process.platform
-        },
-        startTime: new Date(),
-        endTime: new Date(),
-        duration: 0
-    };
-    private currentSuite: any = null;
-    private currentTest: any = null;
+interface ReportTestStep {
+    name: string;
+    status: 'running' | 'passed' | 'failed';
+    startTime: Date;
+    actions: Action[];
+    duration: number;
+    screenshot: string | null;
+    category?: string;
+    title?: string;
+    error?: Error;
+}
+
+interface Test {
+    name: string;
+    steps: ReportTestStep[];
+    status: string;
+    startTime: Date;
+    duration?: number;
+    actions: Action[];
+    screenshots: string[];
+}
+
+interface Suite {
+    name: string;
+    tests: Test[];
+}
+
+interface Report {
+    suites: Suite[];
+    summary: ReportSummary;
+    browserInfo: BrowserInfo;
+    startTime: Date;
+    endTime: Date;
+    duration: number;
+}
+
+export default class HTMLReporter {
+    private report: Report;
+    private currentSuite: Suite | null;
+    private currentTest: Test | null;
+    private currentStep: ReportTestStep | null;
     private artifactsPath: string;
-    private currentStep: any = null;
-    
+
     constructor() {
+        this.report = {
+            suites: [],
+            summary: {
+                total: 0,
+                passed: 0,
+                failed: 0,
+                skipped: 0
+            },
+            browserInfo: {
+                name: '',
+                version: '',
+                platform: process.platform
+            },
+            startTime: new Date(),
+            endTime: new Date(),
+            duration: 0
+        };
+
+        this.currentSuite = null;
+        this.currentTest = null;
+        this.currentStep = null;
         this.artifactsPath = path.join(process.cwd(), 'test-results');
+
         if (!fs.existsSync(this.artifactsPath)) {
             fs.mkdirSync(this.artifactsPath, { recursive: true });
         }
     }
 
-   
-    async onBegin(config: FullConfig, suite: Suite) {
+    async onBegin(config: FullConfig, suite: any): Promise<void> {
         const project = config.projects[0];
         const browserName = project.use.browserName || 'chromium';
         const channel = project.use.channel;
-        
+
         this.report.browserInfo = {
             name: this.getBrowserName(browserName),
             version: channel || 'latest',
             platform: process.platform,
             headless: project.use.headless ? 'Headless' : 'Headed'
         };
+
         this.report.startTime = new Date();
     }
 
@@ -73,7 +120,7 @@ export default class HTMLReporter implements Reporter {
         return browserMap[browserName] || browserName;
     }
 
-    onTestBegin(test: TestCase, result: TestResult) {
+    onTestBegin(test: TestCase): void {
         if (!this.currentSuite || this.currentSuite.name !== test.parent.title) {
             this.currentSuite = {
                 name: test.parent.title || 'Default Suite',
@@ -93,13 +140,13 @@ export default class HTMLReporter implements Reporter {
         this.currentSuite.tests.push(this.currentTest);
     }
 
-    onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
+    onStepBegin(test: TestCase, result: TestResult, step: ReportTestStep): void {
         if (step.category === 'test.step' && this.currentTest) {
-            const stepInfo = {
-                name: step.title,
+            const stepInfo: ReportTestStep = {
+                name: step.title || '',
                 status: 'running',
                 startTime: new Date(),
-                actions: [] as ActionInfo[],
+                actions: [],
                 duration: 0,
                 screenshot: null
             };
@@ -108,7 +155,7 @@ export default class HTMLReporter implements Reporter {
         }
     }
 
-    trackPageAction(action: ActionInfo) {
+    trackPageAction(action: Action): void {
         if (this.currentStep) {
             const formattedAction = {
                 ...action,
@@ -118,7 +165,8 @@ export default class HTMLReporter implements Reporter {
             this.currentStep.actions.push(formattedAction);
         }
     }
-    private formatActionDescription(action: ActionInfo): string {
+
+    private formatActionDescription(action: Action): string {
         switch (action.type) {
             case 'click':
                 return `Clicked on ${action.selector} ${action.description || ''}`;
@@ -133,7 +181,7 @@ export default class HTMLReporter implements Reporter {
         }
     }
 
-    onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
+    onStepEnd(test: TestCase, result: TestResult, step: ReportTestStep): void {
         if (step.category === 'test.step' && this.currentTest) {
             const currentStep = this.currentTest.steps[this.currentTest.steps.length - 1];
             if (currentStep) {
@@ -143,7 +191,7 @@ export default class HTMLReporter implements Reporter {
                 if (step.error && result.attachments) {
                     const screenshot = result.attachments.find(a => a.name === 'screenshot');
                     if (screenshot && screenshot.path) {
-                        const screenshotName = `${test.title}-${step.title}-failed.png`.replace(/[^a-zA-Z0-9-]/g, '_');
+                        const screenshotName = `${test.title}-${step.title || ''}-failed.png`.replace(/[^a-zA-Z0-9-]/g, '_');
                         const screenshotPath = path.join(this.artifactsPath, screenshotName);
                         fs.copyFileSync(screenshot.path, screenshotPath);
                         currentStep.screenshot = screenshotName;
@@ -153,11 +201,11 @@ export default class HTMLReporter implements Reporter {
         }
     }
 
-    async onTestEnd(test: TestCase, result: TestResult) {
+    async onTestEnd(test: TestCase, result: TestResult): Promise<void> {
         if (this.currentTest) {
             this.currentTest.status = result.status;
             this.currentTest.duration = result.duration;
-            this.report.summary[result.status]++;
+            this.report.summary[result.status as keyof ReportSummary]++;
             this.report.summary.total++;
 
             if (result.status === 'failed' && result.attachments) {
@@ -173,7 +221,7 @@ export default class HTMLReporter implements Reporter {
         }
     }
 
-    async onEnd(result: FullResult) {
+    async onEnd(result: any): Promise<void> {
         this.report.endTime = new Date();
         this.report.duration = this.report.endTime.getTime() - this.report.startTime.getTime();
 

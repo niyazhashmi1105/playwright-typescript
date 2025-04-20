@@ -1,68 +1,68 @@
-import { FullConfig, Reporter, Suite, TestCase, TestResult } from '@playwright/test/reporter';
-import { testCounter, testDuration, testRetries, startMetricsServer } from './metrics-server';
+import { Reporter, FullConfig, TestCase, TestResult, TestStep } from '@playwright/test/reporter';
+import { Counter, Gauge, Histogram } from 'prom-client';
+import { MetricsServer } from './metrics-server';
 
-interface PrometheusReporterConfig {
-    port?: number;
-    enabled?: boolean;
-}
+export default class PrometheusReporter implements Reporter {
+    private metricsServer: MetricsServer;
+    private testCounter: Counter;
+    private testDurationHistogram: Histogram;
+    private activeTestsGauge: Gauge;
+    private testStepCounter: Counter;
 
-class PrometheusReporter implements Reporter {
-    private server: any;
-    private currentSuite: string = '';
+    constructor() {
+        const port = process.env.METRICS_PORT ? parseInt(process.env.METRICS_PORT) : 9323;
+        this.metricsServer = new MetricsServer(port);
 
-    constructor(config: PrometheusReporterConfig = {}) {
-        const port = process.env.METRICS_PORT ? parseInt(process.env.METRICS_PORT) : (config.port || 9323);
-        if (config.enabled !== false) {
-            this.server = startMetricsServer(port);
-        }
+        const registry = this.metricsServer.getRegistry();
+
+        // Initialize metrics
+        this.testCounter = new Counter({
+            name: 'playwright_tests_total',
+            help: 'Total number of tests run',
+            labelNames: ['status'],
+            registers: [registry]
+        });
+
+        this.testDurationHistogram = new Histogram({
+            name: 'playwright_test_duration_seconds',
+            help: 'Test execution time',
+            registers: [registry]
+        });
+
+        this.activeTestsGauge = new Gauge({
+            name: 'playwright_active_tests',
+            help: 'Number of currently running tests',
+            registers: [registry]
+        });
+
+        this.testStepCounter = new Counter({
+            name: 'playwright_test_steps_total',
+            help: 'Total number of test steps',
+            labelNames: ['status'],
+            registers: [registry]
+        });
     }
 
-    onBegin(config: FullConfig, suite: Suite) {
-        // Reset metrics when test run begins
-        testCounter.reset();
-        testDuration.reset();
-        testRetries.reset();
+    onBegin(config: FullConfig) {
+        this.metricsServer.start();
     }
 
     onTestBegin(test: TestCase) {
-        this.currentSuite = test.parent.title;
+        this.activeTestsGauge.inc();
     }
 
     onTestEnd(test: TestCase, result: TestResult) {
-        try {
-            // Record test result
-            testCounter.inc({
-                status: result.status,
-                browser: test.parent.project()?.name || 'unknown',
-                suite: this.currentSuite
+        this.activeTestsGauge.dec();
+        this.testCounter.inc({ 
+            status: result.status
+        });
+        this.testDurationHistogram.observe(result.duration / 1000); // Convert to seconds
+
+        // Count steps
+        result.steps.forEach((step: TestStep) => {
+            this.testStepCounter.inc({
+                status: step.error ? 'failed' : 'passed'
             });
-
-            // Record test duration
-            testDuration.observe(
-                {
-                    test_name: test.title,
-                    browser: test.parent.project()?.name || 'unknown',
-                    suite: this.currentSuite
-                },
-                result.duration / 1000 // Convert ms to seconds
-            );
-
-            // Record retries if any
-            if (result.retry > 0) {
-                testRetries.inc({
-                    test_name: test.title,
-                    browser: test.parent.project()?.name || 'unknown'
-                });
-            }
-        } catch (error) {
-            console.error('Error recording metrics:', error);
-        }
-    }
-
-    async onEnd() {
-        // Do not close the server, let it run for Prometheus to scrape
-        console.log('Tests complete. Metrics server still running on port', process.env.METRICS_PORT || 9323);
+        });
     }
 }
-
-export default PrometheusReporter;

@@ -1,4 +1,4 @@
-name: Playwright Tests
+name: Playwright Tests with Metrics
 on:
   push:
     branches: [ main, master ]
@@ -10,21 +10,53 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Create Docker network
-      run: docker network create test-network
+      run: docker network create monitoring-network
 
     - name: Setup Prometheus
       run: |
         mkdir -p prometheus
-        cp prometheus.yml prometheus/prometheus.yml
+        cat > prometheus/prometheus.yml <<EOF
+        global:
+          scrape_interval: 15s
+        scrape_configs:
+          - job_name: 'playwright-tests'
+            static_configs:
+              - targets: ['localhost:9323']
+        EOF
         docker run -d \
           --name prometheus \
-          --network test-network \
+          --network monitoring-network \
           -p 9090:9090 \
           -v ${{ github.workspace }}/prometheus:/etc/prometheus \
           prom/prometheus
+
+    - name: Setup Grafana
+      run: |
+        docker run -d \
+          --name grafana \
+          --network monitoring-network \
+          -p 3000:3000 \
+          -e "GF_AUTH_ANONYMOUS_ENABLED=true" \
+          -e "GF_AUTH_ANONYMOUS_ORG_ROLE=Admin" \
+          grafana/grafana
         
+    - name: Configure Grafana Datasource and Dashboard
+      run: |
+        # Wait for Grafana to be ready
+        sleep 10
+        # Add Prometheus as datasource
+        curl -X POST http://localhost:3000/api/datasources \
+          -H "Content-Type: application/json" \
+          --data-binary '{
+            "name": "Prometheus",
+            "type": "prometheus",
+            "url": "http://prometheus:9090",
+            "access": "proxy",
+            "isDefault": true
+          }'
+
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
@@ -35,25 +67,25 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
       
-    - name: Run Playwright tests
+    - name: Run Playwright tests with metrics
       run: |
         docker run -d \
           --name test-runner \
-          --network test-network \
+          --network monitoring-network \
           -v ${{ github.workspace }}:/app \
           -w /app \
           -e METRICS_PORT=9323 \
           -p 9323:9323 \
           node:lts \
-          npm run all:headless
+          sh -c "npm install && PLAYWRIGHT_METRICS=true npm run all:headless"
       
-    - name: Verify metrics endpoint
+    - name: Wait for tests and collect metrics
       run: |
-        sleep 10  # Give both services time to start
-        curl -v http://localhost:9323/metrics || echo "Metrics endpoint not accessible"
-        curl -v http://localhost:9090/api/v1/targets || echo "Prometheus endpoint not accessible"
-        docker logs prometheus
-        docker logs test-runner
+        docker logs -f test-runner || true
+        echo "Tests completed, metrics should be available in Grafana"
+        
+    - name: Check Prometheus targets
+      run: curl -s http://localhost:9090/api/v1/targets | jq .
         
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

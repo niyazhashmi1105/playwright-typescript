@@ -1,14 +1,13 @@
 // filepath: /Users/mdniyazhashmi/playwright-typescript/pages/homepage.ts
+import { Page } from '@playwright/test';
 import { BasePage } from './basepage';
-import type { Page } from '@playwright/test';
 
 export class HomePage extends BasePage {
-    private readonly productsList: string;
-    private readonly productsCost: string;
+    private productsList: string;
+    private productsCost: string;
 
-    constructor(public readonly page: Page) {
+    constructor(page: Page) {
         super(page);
-        
         this.productsList = "//div[@class='inventory_item_label']/a/div";
         this.productsCost = ".pricebar > div";
     }
@@ -21,7 +20,7 @@ export class HomePage extends BasePage {
     async getProductName(productName: string): Promise<boolean> {
         const products = await this.page.$$(this.productsList);
         for (const product of products) {
-            if (productName === await product.textContent()) {
+            if (productName === (await product.textContent())) {
                 return true;
             }
         }
@@ -31,7 +30,7 @@ export class HomePage extends BasePage {
     async addProductToCart(productName: string, selector: string): Promise<void> {
         const productsCount = await this.page.$$(this.productsList);
         for (const product of productsCount) {
-            if (productName === await product.textContent()) {
+            if (productName === (await product.textContent())) {
                 await this.page.locator(selector).click();
                 break;
             }

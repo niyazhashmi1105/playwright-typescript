@@ -1,13 +1,13 @@
 // filepath: /Users/mdniyazhashmi/playwright-typescript/pages/cartpage.ts
+import { Page } from '@playwright/test';
 import { BasePage } from './basepage';
-import type { Page } from '@playwright/test';
 
 export class CartPage extends BasePage {
-    private readonly products: string;
-    private readonly productPrices: string;
-    private readonly removeBtn: string;
+    private products: string;
+    private productPrices: string;
+    private removeBtn: string;
 
-    constructor(public readonly page: Page) {
+    constructor(page: Page) {
         super(page);
         this.products = ".inventory_item_name";
         this.productPrices = ".inventory_item_price";
@@ -29,7 +29,7 @@ export class CartPage extends BasePage {
         let count = 0;
         for (const prod of prods) {
             count++;
-            if (productName === await prod.textContent()) {
+            if (productName === (await prod.textContent())) {
                 await this.page.locator(this.removeBtn).nth(count - 1).click();
                 break;
             }
