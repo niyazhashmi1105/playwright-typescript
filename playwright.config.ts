@@ -49,15 +49,19 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [['html'],
-  ['allure-playwright',{
-    outputFolder: 'allure-results',
-    detail: true,
-    suiteTitle:true
-  }],
-  ['./utils/prometheus-reporter.ts'],
-  ["ortoni-report", reportConfig],
-],
+  reporter: [
+    ['html'],
+    ['allure-playwright', {
+      outputFolder: 'allure-results',
+      detail: true,
+      suiteTitle: true
+    }],
+    ['./utils/prometheus-reporter.ts', {
+      port: process.env.METRICS_PORT || 9323,
+      enabled: true
+    }],
+    ["ortoni-report", reportConfig],
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */

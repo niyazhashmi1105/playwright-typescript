@@ -1,12 +1,25 @@
 import { FullConfig, Reporter, Suite, TestCase, TestResult } from '@playwright/test/reporter';
 import { testCounter, testDuration, testRetries, startMetricsServer } from './metrics-server';
 
+interface PrometheusReporterOptions {
+    port?: number;
+    enabled?: boolean;
+}
+
 class PrometheusReporter implements Reporter {
     private server: any;
     private currentSuite: string = '';
+    private options: PrometheusReporterOptions;
 
-    constructor() {
-        this.server = startMetricsServer();
+    constructor(options: PrometheusReporterOptions = {}) {
+        this.options = {
+            port: options.port || 9323,
+            enabled: options.enabled !== false
+        };
+        
+        if (this.options.enabled) {
+            this.server = startMetricsServer(this.options.port);
+        }
     }
 
     onBegin(config: FullConfig, suite: Suite) {
@@ -48,8 +61,8 @@ class PrometheusReporter implements Reporter {
     }
 
     async onEnd() {
-        // Keep the metrics server running after tests complete
-        // You might want to add a cleanup mechanism in a real implementation
+        // Keep the metrics server running but log that tests are complete
+        console.log('Tests complete. Metrics server still running on port', this.options.port);
     }
 }
 

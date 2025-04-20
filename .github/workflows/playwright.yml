@@ -8,6 +8,15 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    services:
+      prometheus:
+        image: prom/prometheus
+        ports:
+          - 9090:9090
+        volumes:
+          - ./prometheus.yml:/etc/prometheus/prometheus.yml
+        options: --name prometheus
+
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -19,6 +28,12 @@ jobs:
       run: npx playwright install --with-deps
     - name: Run Playwright tests
       run: npm run all:headless
+      env:
+        METRICS_PORT: 9323
+    - name: Verify metrics endpoint
+      run: |
+        sleep 5  # Give the metrics server time to start
+        curl -f http://localhost:9323/metrics || echo "Metrics endpoint not accessible"
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

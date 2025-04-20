@@ -19,5 +19,8 @@ COPY . .
 # Create directory for reports
 RUN mkdir -p my-report
 
+# Expose metrics port
+EXPOSE 9323
+
 # Set the default command to run tests
 CMD ["npm", "run", "all:headless"]

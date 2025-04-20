@@ -29,17 +29,23 @@ register.registerMetric(testCounter);
 register.registerMetric(testDuration);
 register.registerMetric(testRetries);
 
-export function startMetricsServer(port = 9323) {
+export function startMetricsServer(port = process.env.METRICS_PORT ? parseInt(process.env.METRICS_PORT) : 9323) {
     const app = express();
 
-    // Enable metrics endpoint
+    // Enable metrics endpoint with CORS enabled for Prometheus
+    app.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Methods', 'GET');
+        next();
+    });
+
     app.get('/metrics', async (req, res) => {
         res.set('Content-Type', register.contentType);
         res.end(await register.metrics());
     });
 
-    // Start server
-    const server = app.listen(port, () => {
+    // Start server - listen on all interfaces
+    const server = app.listen(port, '0.0.0.0', () => {
         console.log(`Metrics server listening on port ${port}`);
     });
 
