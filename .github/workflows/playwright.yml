@@ -10,31 +10,51 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Create Docker network
+      run: docker network create test-network
+
     - name: Setup Prometheus
       run: |
         mkdir -p prometheus
         cp prometheus.yml prometheus/prometheus.yml
         docker run -d \
           --name prometheus \
+          --network test-network \
           -p 9090:9090 \
           -v ${{ github.workspace }}/prometheus:/etc/prometheus \
           prom/prometheus
+        
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
+    
     - name: Install dependencies
       run: npm ci
+      
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+      
     - name: Run Playwright tests
-      run: npm run all:headless
-      env:
-        METRICS_PORT: 9323
+      run: |
+        docker run -d \
+          --name test-runner \
+          --network test-network \
+          -v ${{ github.workspace }}:/app \
+          -w /app \
+          -e METRICS_PORT=9323 \
+          -p 9323:9323 \
+          node:lts \
+          npm run all:headless
+      
     - name: Verify metrics endpoint
       run: |
-        sleep 5  # Give the metrics server time to start
-        curl -f http://localhost:9323/metrics || echo "Metrics endpoint not accessible"
+        sleep 10  # Give both services time to start
+        curl -v http://localhost:9323/metrics || echo "Metrics endpoint not accessible"
+        curl -v http://localhost:9090/api/v1/targets || echo "Prometheus endpoint not accessible"
         docker logs prometheus
+        docker logs test-runner
+        
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

@@ -29,7 +29,13 @@ register.registerMetric(testCounter);
 register.registerMetric(testDuration);
 register.registerMetric(testRetries);
 
+let metricsServer: any = null;
+
 export function startMetricsServer(port = process.env.METRICS_PORT ? parseInt(process.env.METRICS_PORT) : 9323) {
+    if (metricsServer) {
+        return metricsServer;
+    }
+
     const app = express();
 
     // Enable metrics endpoint with CORS enabled for Prometheus
@@ -39,15 +45,40 @@ export function startMetricsServer(port = process.env.METRICS_PORT ? parseInt(pr
         next();
     });
 
+    // Health check endpoint
+    app.get('/health', (req, res) => {
+        res.send('OK');
+    });
+
     app.get('/metrics', async (req, res) => {
-        res.set('Content-Type', register.contentType);
-        res.end(await register.metrics());
+        try {
+            res.set('Content-Type', register.contentType);
+            const metrics = await register.metrics();
+            res.end(metrics);
+        } catch (err) {
+            console.error('Error collecting metrics:', err);
+            res.status(500).end();
+        }
     });
 
     // Start server - listen on all interfaces
-    const server = app.listen(port, '0.0.0.0', () => {
+    metricsServer = app.listen(port, '0.0.0.0', () => {
         console.log(`Metrics server listening on port ${port}`);
     });
 
-    return server;
+    // Handle server errors
+    metricsServer.on('error', (err: Error) => {
+        console.error('Metrics server error:', err);
+    });
+
+    // Setup graceful shutdown
+    process.on('SIGTERM', () => {
+        if (metricsServer) {
+            metricsServer.close(() => {
+                console.log('Metrics server stopped');
+            });
+        }
+    });
+
+    return metricsServer;
 }

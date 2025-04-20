@@ -12,7 +12,14 @@
     "allure:open": "allure open allure-report",
     "browserstack-playwright": "npx browserstack-node-sdk playwright test end2end.spec.ts",
     "execute-tests": "npm run browserstack-playwright || true && npm run allure:generate && npm run allure:open",
-    "execute-tests-browserstack": "browserstack-node-sdk npm run browserstack-playwright || true && npm run allure:generate && npm run allure:open"
+    "execute-tests-browserstack": "browserstack-node-sdk npm run browserstack-playwright || true && npm run allure:generate && npm run allure:open",
+    "docker:test": "docker-compose up --build",
+    "docker:stop": "docker-compose down",
+    "check:metrics": "curl -s http://localhost:9323/metrics",
+    "check:prometheus": "curl -s http://localhost:9090/api/v1/targets | jq",
+    "monitor:health": "./utils/check-metrics.sh",
+    "monitor:start": "docker-compose up -d && sleep 5 && npm run monitor:health",
+    "monitor:stop": "docker-compose down"
   },
   "keywords": [],
   "author": "",
