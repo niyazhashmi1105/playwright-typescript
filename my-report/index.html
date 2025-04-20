@@ -338,15 +338,22 @@
                     <div class="column is-one-sixth">
                         <div class="box  " style="border-left: 5px solid hsl(var(--bulma-primary-h), var(--bulma-primary-s), var(--bulma-primary-l)) !important"
                             data-status="all">
-                            <p class="title is-size-3 mb-0">35</p>
+                            <p class="title is-size-3 mb-0">15</p>
                             <p class="subtitle is-size-7">All Tests</p>
                         </div>
                     </div>
                     <div class="column is-one-sixth">
                         <div class="box  " style="border-left: 5px solid hsl(var(--bulma-success-h), var(--bulma-success-s), var(--bulma-success-l)) !important"
                             data-status="passed">
-                            <p class="title is-size-3 mb-0">35</p>
+                            <p class="title is-size-3 mb-0">12</p>
                             <p class="subtitle is-size-7">Passed</p>
+                        </div>
+                    </div>
+                    <div class="column is-one-sixth">
+                        <div class="box  " style="border-left: 5px solid hsl(var(--bulma-danger-h), var(--bulma-danger-s), var(--bulma-danger-l)) !important"
+                            data-status="failed">
+                            <p class="title is-size-3 mb-0">3</p>
+                            <p class="subtitle is-size-7">Failed</p>
                         </div>
                     </div>
                 </div>
@@ -360,7 +367,7 @@
                                     <span class="icon has-text-success mr-2">
                                         <i class="fas fa-chart-pie"></i>
                                     </span>
-                                    <span class="is-size-5 has-text-weight-bold">100.00 %</span>
+                                    <span class="is-size-5 has-text-weight-bold">80.00 %</span>
                                 </p>
                             </div>
                             <div class="field">
@@ -369,7 +376,7 @@
                                     <span class="icon has-text-info mr-2">
                                         <i class="fas fa-calendar-alt"></i>
                                     </span>
-                                    <span class="is-size-5">17-Apr-2025 9:59:34 AM</span>
+                                    <span class="is-size-5">20-Apr-2025 12:50:19 PM</span>
                                 </p>
                             </div>
                             <div class="field">
@@ -378,7 +385,7 @@
                                     <span class="icon has-text-warning mr-2">
                                         <i class="fas fa-stopwatch"></i>
                                     </span>
-                                    <span class="is-size-5">31s:399ms</span>
+                                    <span class="is-size-5">12s:934ms</span>
                                 </p>
                             </div>
                         </div>
@@ -462,7 +469,7 @@
                                 data: {
                                     labels: ['Passed', 'Failed', 'Skipped', 'Flaky'],
                                     datasets: [{
-                                        data: [35, 0, 0, 0, 0],
+                                        data: [12, 3, 0, 0, 0],
                                 backgroundColor: ['#28a745', '#ff6685', '#66d1ff', '#ffb70f', '#69748c']}]
                                 },
                                 options: {
@@ -509,17 +516,9 @@
                             const projectNames = [
                   "chromium",
                   "firefox",
-                  "webkit",
-                  "Mobile Chrome",
-                  "Mobile Safari",
-                  "Microsoft Edge",
-                  "Google Chrome"
+                  "webkit"
                 ];
                             const totalTests = [
-                  5,
-                  5,
-                  5,
-                  5,
                   5,
                   5,
                   5
@@ -560,28 +559,16 @@
                                 }
                             });
                             const passedTests = [
-                  5,
-                  5,
-                  5,
-                  5,
-                  5,
-                  5,
-                  5
+                  4,
+                  4,
+                  4
                 ];
                             const failedTests = [
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0
+                  1,
+                  1,
+                  1
                 ];
                             const skippedTests = [
-                  0,
-                  0,
-                  0,
-                  0,
                   0,
                   0,
                   0
@@ -589,17 +576,9 @@
                             const retryTests = [
                   0,
                   0,
-                  0,
-                  0,
-                  0,
-                  0,
                   0
                 ];
                             const flakyTests = [
-                  0,
-                  0,
-                  0,
-                  0,
                   0,
                   0,
                   0
@@ -680,7 +659,7 @@
                             <div class="box filter is-clickable" style="border-left: 5px solid hsl(var(--bulma-primary-h), var(--bulma-primary-s), var(--bulma-primary-l)) !important"
                                 data-status="all">
                                 <p class="title is-size-6 mb-0">
-                                    35 <span class="icon is-small"><i class="fa-solid fa-vial"></i></span>
+                                    15 <span class="icon is-small"><i class="fa-solid fa-vial"></i></span>
                                 </p>
                             </div>
                         </div>
@@ -688,7 +667,15 @@
                             <div class="box filter is-clickable" style="border-left: 5px solid hsl(var(--bulma-success-h), var(--bulma-success-s), var(--bulma-success-l)) !important"
                                 data-status="passed">
                                 <p class="title is-size-6 mb-0">
-                                    35 <span class="icon is-small"><i class="fa fa-check-circle"></i></span>
+                                    12 <span class="icon is-small"><i class="fa fa-check-circle"></i></span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="column is-one-sixth">
+                            <div class="box filter is-clickable" style="border-left: 5px solid hsl(var(--bulma-danger-h), var(--bulma-danger-s), var(--bulma-danger-l)) !important"
+                                data-status="failed">
+                                <p class="title is-size-6 mb-0">
+                                    3 <span class="icon is-small"><i class="fa fa-times-circle"></i></span>
                                 </p>
                             </div>
                         </div>
@@ -728,30 +715,6 @@
                                                 <label class="checkbox is-capitalized">
                                                     <input name="webkit" type="checkbox" data-filter-type="project" value="webkit" />
                                                     webkit
-                                                </label>
-                                            </div>
-                                            <div class="dropdown-item">
-                                                <label class="checkbox is-capitalized">
-                                                    <input name="Mobile Chrome" type="checkbox" data-filter-type="project" value="Mobile Chrome" />
-                                                    Mobile Chrome
-                                                </label>
-                                            </div>
-                                            <div class="dropdown-item">
-                                                <label class="checkbox is-capitalized">
-                                                    <input name="Mobile Safari" type="checkbox" data-filter-type="project" value="Mobile Safari" />
-                                                    Mobile Safari
-                                                </label>
-                                            </div>
-                                            <div class="dropdown-item">
-                                                <label class="checkbox is-capitalized">
-                                                    <input name="Microsoft Edge" type="checkbox" data-filter-type="project" value="Microsoft Edge" />
-                                                    Microsoft Edge
-                                                </label>
-                                            </div>
-                                            <div class="dropdown-item">
-                                                <label class="checkbox is-capitalized">
-                                                    <input name="Google Chrome" type="checkbox" data-filter-type="project" value="Google Chrome" />
-                                                    Google Chrome
                                                 </label>
                                             </div>
                                             <hr class="dropdown-divider" />
@@ -927,71 +890,35 @@
                                                     </g>
                                                 </svg>
                                             </span>
-                                            <span class="is-size-6">check the product available or not</span>
+                                            <span class="is-size-6">Check the first and last product before applying filter and after applying the filter</span>
                                         </summary>
                                         <div class="test-item 
                                             status-passed
-                                             ml-4" data-suite-name="check the product available or not"
+                                             ml-4" data-suite-name="Check the first and last product before applying filter and after applying the filter"
                                             data-test-tags="" data-project-name="chromium" data-test-id="0"
-                                            data-test-history-id="end2end.spec.ts:chromium:check the product available or not" data-test-status="passed " data-test-duration="01s:741ms">
+                                            data-test-history-id="end2end.spec.ts:chromium:Check the first and last product before applying filter and after applying the filter" data-test-status="passed " data-test-duration="01s:972ms">
                                             <div class="icon-text">
-                                                <span>check the product available or not</span>
+                                                <span>Check the first and last product before applying filter and after applying the filter</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">chromium</span>
                                         </div>                <div class="test-item 
                                             status-passed
-                                             ml-4" data-suite-name="check the product available or not"
-                                            data-test-tags="" data-project-name="firefox" data-test-id="7"
-                                            data-test-history-id="end2end.spec.ts:firefox:check the product available or not" data-test-status="passed " data-test-duration="02s:113ms">
+                                             ml-4" data-suite-name="Check the first and last product before applying filter and after applying the filter"
+                                            data-test-tags="" data-project-name="firefox" data-test-id="8"
+                                            data-test-history-id="end2end.spec.ts:firefox:Check the first and last product before applying filter and after applying the filter" data-test-status="passed " data-test-duration="02s:654ms">
                                             <div class="icon-text">
-                                                <span>check the product available or not</span>
+                                                <span>Check the first and last product before applying filter and after applying the filter</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">firefox</span>
                                         </div>                <div class="test-item 
                                             status-passed
-                                             ml-4" data-suite-name="check the product available or not"
-                                            data-test-tags="" data-project-name="webkit" data-test-id="11"
-                                            data-test-history-id="end2end.spec.ts:webkit:check the product available or not" data-test-status="passed " data-test-duration="01s:679ms">
+                                             ml-4" data-suite-name="Check the first and last product before applying filter and after applying the filter"
+                                            data-test-tags="" data-project-name="webkit" data-test-id="13"
+                                            data-test-history-id="end2end.spec.ts:webkit:Check the first and last product before applying filter and after applying the filter" data-test-status="passed " data-test-duration="01s:343ms">
                                             <div class="icon-text">
-                                                <span>check the product available or not</span>
+                                                <span>Check the first and last product before applying filter and after applying the filter</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">webkit</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="check the product available or not"
-                                            data-test-tags="" data-project-name="Mobile Chrome" data-test-id="16"
-                                            data-test-history-id="end2end.spec.ts:Mobile Chrome:check the product available or not" data-test-status="passed " data-test-duration="01s:694ms">
-                                            <div class="icon-text">
-                                                <span>check the product available or not</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Mobile Chrome</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="check the product available or not"
-                                            data-test-tags="" data-project-name="Mobile Safari" data-test-id="21"
-                                            data-test-history-id="end2end.spec.ts:Mobile Safari:check the product available or not" data-test-status="passed " data-test-duration="01s:232ms">
-                                            <div class="icon-text">
-                                                <span>check the product available or not</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Mobile Safari</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="check the product available or not"
-                                            data-test-tags="" data-project-name="Microsoft Edge" data-test-id="25"
-                                            data-test-history-id="end2end.spec.ts:Microsoft Edge:check the product available or not" data-test-status="passed " data-test-duration="01s:873ms">
-                                            <div class="icon-text">
-                                                <span>check the product available or not</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Microsoft Edge</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="check the product available or not"
-                                            data-test-tags="" data-project-name="Google Chrome" data-test-id="33"
-                                            data-test-history-id="end2end.spec.ts:Google Chrome:check the product available or not" data-test-status="passed " data-test-duration="980ms">
-                                            <div class="icon-text">
-                                                <span>check the product available or not</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Google Chrome</span>
                                         </div>            </details>
                                     <details class="test-case">
                                         <summary>
@@ -1018,7 +945,7 @@
                                             status-passed
                                              ml-4" data-suite-name="count the number of products"
                                             data-test-tags="" data-project-name="chromium" data-test-id="1"
-                                            data-test-history-id="end2end.spec.ts:chromium:count the number of products" data-test-status="passed " data-test-duration="01s:791ms">
+                                            data-test-history-id="end2end.spec.ts:chromium:count the number of products" data-test-status="passed " data-test-duration="02s:159ms">
                                             <div class="icon-text">
                                                 <span>count the number of products</span>
                                             </div>
@@ -1026,8 +953,8 @@
                                         </div>                <div class="test-item 
                                             status-passed
                                              ml-4" data-suite-name="count the number of products"
-                                            data-test-tags="" data-project-name="firefox" data-test-id="5"
-                                            data-test-history-id="end2end.spec.ts:firefox:count the number of products" data-test-status="passed " data-test-duration="02s:626ms">
+                                            data-test-tags="" data-project-name="firefox" data-test-id="6"
+                                            data-test-history-id="end2end.spec.ts:firefox:count the number of products" data-test-status="passed " data-test-duration="02s:557ms">
                                             <div class="icon-text">
                                                 <span>count the number of products</span>
                                             </div>
@@ -1036,47 +963,11 @@
                                             status-passed
                                              ml-4" data-suite-name="count the number of products"
                                             data-test-tags="" data-project-name="webkit" data-test-id="10"
-                                            data-test-history-id="end2end.spec.ts:webkit:count the number of products" data-test-status="passed " data-test-duration="01s:630ms">
+                                            data-test-history-id="end2end.spec.ts:webkit:count the number of products" data-test-status="passed " data-test-duration="01s:809ms">
                                             <div class="icon-text">
                                                 <span>count the number of products</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">webkit</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="count the number of products"
-                                            data-test-tags="" data-project-name="Mobile Chrome" data-test-id="15"
-                                            data-test-history-id="end2end.spec.ts:Mobile Chrome:count the number of products" data-test-status="passed " data-test-duration="01s:524ms">
-                                            <div class="icon-text">
-                                                <span>count the number of products</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Mobile Chrome</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="count the number of products"
-                                            data-test-tags="" data-project-name="Mobile Safari" data-test-id="20"
-                                            data-test-history-id="end2end.spec.ts:Mobile Safari:count the number of products" data-test-status="passed " data-test-duration="01s:240ms">
-                                            <div class="icon-text">
-                                                <span>count the number of products</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Mobile Safari</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="count the number of products"
-                                            data-test-tags="" data-project-name="Microsoft Edge" data-test-id="28"
-                                            data-test-history-id="end2end.spec.ts:Microsoft Edge:count the number of products" data-test-status="passed " data-test-duration="02s:037ms">
-                                            <div class="icon-text">
-                                                <span>count the number of products</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Microsoft Edge</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="count the number of products"
-                                            data-test-tags="" data-project-name="Google Chrome" data-test-id="30"
-                                            data-test-history-id="end2end.spec.ts:Google Chrome:count the number of products" data-test-status="passed " data-test-duration="01s:241ms">
-                                            <div class="icon-text">
-                                                <span>count the number of products</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Google Chrome</span>
                                         </div>            </details>
                                     <details class="test-case">
                                         <summary>
@@ -1097,71 +988,35 @@
                                                     </g>
                                                 </svg>
                                             </span>
-                                            <span class="is-size-6">Check the first and last product before applying filter and after applying the filter</span>
+                                            <span class="is-size-6">check the product available or not</span>
                                         </summary>
                                         <div class="test-item 
                                             status-passed
-                                             ml-4" data-suite-name="Check the first and last product before applying filter and after applying the filter"
+                                             ml-4" data-suite-name="check the product available or not"
                                             data-test-tags="" data-project-name="chromium" data-test-id="2"
-                                            data-test-history-id="end2end.spec.ts:chromium:Check the first and last product before applying filter and after applying the filter" data-test-status="passed " data-test-duration="01s:827ms">
+                                            data-test-history-id="end2end.spec.ts:chromium:check the product available or not" data-test-status="passed " data-test-duration="02s:168ms">
                                             <div class="icon-text">
-                                                <span>Check the first and last product before applying filter and after applying the filter</span>
+                                                <span>check the product available or not</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">chromium</span>
                                         </div>                <div class="test-item 
                                             status-passed
-                                             ml-4" data-suite-name="Check the first and last product before applying filter and after applying the filter"
-                                            data-test-tags="" data-project-name="firefox" data-test-id="8"
-                                            data-test-history-id="end2end.spec.ts:firefox:Check the first and last product before applying filter and after applying the filter" data-test-status="passed " data-test-duration="02s:264ms">
+                                             ml-4" data-suite-name="check the product available or not"
+                                            data-test-tags="" data-project-name="firefox" data-test-id="5"
+                                            data-test-history-id="end2end.spec.ts:firefox:check the product available or not" data-test-status="passed " data-test-duration="02s:954ms">
                                             <div class="icon-text">
-                                                <span>Check the first and last product before applying filter and after applying the filter</span>
+                                                <span>check the product available or not</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">firefox</span>
                                         </div>                <div class="test-item 
                                             status-passed
-                                             ml-4" data-suite-name="Check the first and last product before applying filter and after applying the filter"
-                                            data-test-tags="" data-project-name="webkit" data-test-id="13"
-                                            data-test-history-id="end2end.spec.ts:webkit:Check the first and last product before applying filter and after applying the filter" data-test-status="passed " data-test-duration="01s:201ms">
+                                             ml-4" data-suite-name="check the product available or not"
+                                            data-test-tags="" data-project-name="webkit" data-test-id="11"
+                                            data-test-history-id="end2end.spec.ts:webkit:check the product available or not" data-test-status="passed " data-test-duration="01s:755ms">
                                             <div class="icon-text">
-                                                <span>Check the first and last product before applying filter and after applying the filter</span>
+                                                <span>check the product available or not</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">webkit</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Check the first and last product before applying filter and after applying the filter"
-                                            data-test-tags="" data-project-name="Mobile Chrome" data-test-id="18"
-                                            data-test-history-id="end2end.spec.ts:Mobile Chrome:Check the first and last product before applying filter and after applying the filter" data-test-status="passed " data-test-duration="01s:664ms">
-                                            <div class="icon-text">
-                                                <span>Check the first and last product before applying filter and after applying the filter</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Mobile Chrome</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Check the first and last product before applying filter and after applying the filter"
-                                            data-test-tags="" data-project-name="Mobile Safari" data-test-id="24"
-                                            data-test-history-id="end2end.spec.ts:Mobile Safari:Check the first and last product before applying filter and after applying the filter" data-test-status="passed " data-test-duration="01s:011ms">
-                                            <div class="icon-text">
-                                                <span>Check the first and last product before applying filter and after applying the filter</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Mobile Safari</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Check the first and last product before applying filter and after applying the filter"
-                                            data-test-tags="" data-project-name="Microsoft Edge" data-test-id="26"
-                                            data-test-history-id="end2end.spec.ts:Microsoft Edge:Check the first and last product before applying filter and after applying the filter" data-test-status="passed " data-test-duration="01s:916ms">
-                                            <div class="icon-text">
-                                                <span>Check the first and last product before applying filter and after applying the filter</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Microsoft Edge</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Check the first and last product before applying filter and after applying the filter"
-                                            data-test-tags="" data-project-name="Google Chrome" data-test-id="34"
-                                            data-test-history-id="end2end.spec.ts:Google Chrome:Check the first and last product before applying filter and after applying the filter" data-test-status="passed " data-test-duration="01s:067ms">
-                                            <div class="icon-text">
-                                                <span>Check the first and last product before applying filter and after applying the filter</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Google Chrome</span>
                                         </div>            </details>
                                     <details class="test-case">
                                         <summary>
@@ -1188,7 +1043,7 @@
                                             status-passed
                                              ml-4" data-suite-name="Add the product into the cart and assert if it is added or not"
                                             data-test-tags="" data-project-name="chromium" data-test-id="3"
-                                            data-test-history-id="end2end.spec.ts:chromium:Add the product into the cart and assert if it is added or not" data-test-status="passed " data-test-duration="01s:883ms">
+                                            data-test-history-id="end2end.spec.ts:chromium:Add the product into the cart and assert if it is added or not" data-test-status="passed " data-test-duration="02s:220ms">
                                             <div class="icon-text">
                                                 <span>Add the product into the cart and assert if it is added or not</span>
                                             </div>
@@ -1196,8 +1051,8 @@
                                         </div>                <div class="test-item 
                                             status-passed
                                              ml-4" data-suite-name="Add the product into the cart and assert if it is added or not"
-                                            data-test-tags="" data-project-name="firefox" data-test-id="6"
-                                            data-test-history-id="end2end.spec.ts:firefox:Add the product into the cart and assert if it is added or not" data-test-status="passed " data-test-duration="02s:272ms">
+                                            data-test-tags="" data-project-name="firefox" data-test-id="7"
+                                            data-test-history-id="end2end.spec.ts:firefox:Add the product into the cart and assert if it is added or not" data-test-status="passed " data-test-duration="02s:607ms">
                                             <div class="icon-text">
                                                 <span>Add the product into the cart and assert if it is added or not</span>
                                             </div>
@@ -1206,47 +1061,11 @@
                                             status-passed
                                              ml-4" data-suite-name="Add the product into the cart and assert if it is added or not"
                                             data-test-tags="" data-project-name="webkit" data-test-id="12"
-                                            data-test-history-id="end2end.spec.ts:webkit:Add the product into the cart and assert if it is added or not" data-test-status="passed " data-test-duration="01s:254ms">
+                                            data-test-history-id="end2end.spec.ts:webkit:Add the product into the cart and assert if it is added or not" data-test-status="passed " data-test-duration="01s:300ms">
                                             <div class="icon-text">
                                                 <span>Add the product into the cart and assert if it is added or not</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">webkit</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Add the product into the cart and assert if it is added or not"
-                                            data-test-tags="" data-project-name="Mobile Chrome" data-test-id="17"
-                                            data-test-history-id="end2end.spec.ts:Mobile Chrome:Add the product into the cart and assert if it is added or not" data-test-status="passed " data-test-duration="01s:523ms">
-                                            <div class="icon-text">
-                                                <span>Add the product into the cart and assert if it is added or not</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Mobile Chrome</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Add the product into the cart and assert if it is added or not"
-                                            data-test-tags="" data-project-name="Mobile Safari" data-test-id="22"
-                                            data-test-history-id="end2end.spec.ts:Mobile Safari:Add the product into the cart and assert if it is added or not" data-test-status="passed " data-test-duration="01s:147ms">
-                                            <div class="icon-text">
-                                                <span>Add the product into the cart and assert if it is added or not</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Mobile Safari</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Add the product into the cart and assert if it is added or not"
-                                            data-test-tags="" data-project-name="Microsoft Edge" data-test-id="27"
-                                            data-test-history-id="end2end.spec.ts:Microsoft Edge:Add the product into the cart and assert if it is added or not" data-test-status="passed " data-test-duration="01s:931ms">
-                                            <div class="icon-text">
-                                                <span>Add the product into the cart and assert if it is added or not</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Microsoft Edge</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Add the product into the cart and assert if it is added or not"
-                                            data-test-tags="" data-project-name="Google Chrome" data-test-id="31"
-                                            data-test-history-id="end2end.spec.ts:Google Chrome:Add the product into the cart and assert if it is added or not" data-test-status="passed " data-test-duration="01s:427ms">
-                                            <div class="icon-text">
-                                                <span>Add the product into the cart and assert if it is added or not</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Google Chrome</span>
                                         </div>            </details>
                                     <details class="test-case">
                                         <summary>
@@ -1270,68 +1089,32 @@
                                             <span class="is-size-6">Add to products into the cart</span>
                                         </summary>
                                         <div class="test-item 
-                                            status-passed
+                                            status-failed
                                              ml-4" data-suite-name="Add to products into the cart"
                                             data-test-tags="" data-project-name="chromium" data-test-id="4"
-                                            data-test-history-id="end2end.spec.ts:chromium:Add to products into the cart" data-test-status="passed " data-test-duration="01s:572ms">
+                                            data-test-history-id="end2end.spec.ts:chromium:Add to products into the cart" data-test-status="failed " data-test-duration="02s:373ms">
                                             <div class="icon-text">
                                                 <span>Add to products into the cart</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">chromium</span>
                                         </div>                <div class="test-item 
-                                            status-passed
+                                            status-failed
                                              ml-4" data-suite-name="Add to products into the cart"
                                             data-test-tags="" data-project-name="firefox" data-test-id="9"
-                                            data-test-history-id="end2end.spec.ts:firefox:Add to products into the cart" data-test-status="passed " data-test-duration="01s:665ms">
+                                            data-test-history-id="end2end.spec.ts:firefox:Add to products into the cart" data-test-status="failed " data-test-duration="02s:092ms">
                                             <div class="icon-text">
                                                 <span>Add to products into the cart</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">firefox</span>
                                         </div>                <div class="test-item 
-                                            status-passed
+                                            status-failed
                                              ml-4" data-suite-name="Add to products into the cart"
                                             data-test-tags="" data-project-name="webkit" data-test-id="14"
-                                            data-test-history-id="end2end.spec.ts:webkit:Add to products into the cart" data-test-status="passed " data-test-duration="01s:663ms">
+                                            data-test-history-id="end2end.spec.ts:webkit:Add to products into the cart" data-test-status="failed " data-test-duration="01s:256ms">
                                             <div class="icon-text">
                                                 <span>Add to products into the cart</span>
                                             </div>
                                             <span class="tag duration-tag has-text-weight-medium">webkit</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Add to products into the cart"
-                                            data-test-tags="" data-project-name="Mobile Chrome" data-test-id="19"
-                                            data-test-history-id="end2end.spec.ts:Mobile Chrome:Add to products into the cart" data-test-status="passed " data-test-duration="01s:773ms">
-                                            <div class="icon-text">
-                                                <span>Add to products into the cart</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Mobile Chrome</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Add to products into the cart"
-                                            data-test-tags="" data-project-name="Mobile Safari" data-test-id="23"
-                                            data-test-history-id="end2end.spec.ts:Mobile Safari:Add to products into the cart" data-test-status="passed " data-test-duration="01s:304ms">
-                                            <div class="icon-text">
-                                                <span>Add to products into the cart</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Mobile Safari</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Add to products into the cart"
-                                            data-test-tags="" data-project-name="Microsoft Edge" data-test-id="29"
-                                            data-test-history-id="end2end.spec.ts:Microsoft Edge:Add to products into the cart" data-test-status="passed " data-test-duration="02s:121ms">
-                                            <div class="icon-text">
-                                                <span>Add to products into the cart</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Microsoft Edge</span>
-                                        </div>                <div class="test-item 
-                                            status-passed
-                                             ml-4" data-suite-name="Add to products into the cart"
-                                            data-test-tags="" data-project-name="Google Chrome" data-test-id="32"
-                                            data-test-history-id="end2end.spec.ts:Google Chrome:Add to products into the cart" data-test-status="passed " data-test-duration="01s:418ms">
-                                            <div class="icon-text">
-                                                <span>Add to products into the cart</span>
-                                            </div>
-                                            <span class="tag duration-tag has-text-weight-medium">Google Chrome</span>
                                         </div>            </details>
                                 </div>
                             </details>
@@ -2494,15 +2277,15 @@
     "port": 2004,
     "annotations": [],
     "testTags": [],
-    "location": "end2end.spec.ts:22:5",
+    "location": "end2end.spec.ts:38:5",
     "retry": "",
     "isRetry": 0,
     "projectName": "chromium",
-    "suite": "check the product available or not",
-    "title": "check the product available or not",
+    "suite": "Check the first and last product before applying filter and after applying the filter",
+    "title": "Check the first and last product before applying filter and after applying the filter",
     "status": "passed",
     "flaky": "expected",
-    "duration": "01s:741ms",
+    "duration": "01s:972ms",
     "errors": [],
     "steps": [
       {
@@ -2512,7 +2295,7 @@
       },
       {
         "snippet": "",
-        "title": "Check the product availability",
+        "title": "Check the first and last product before and after applying filter",
         "location": ""
       },
       {
@@ -2526,9 +2309,9 @@
     "filters": {},
     "base64Image": false,
     "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-f5decb18975722288a32/test-finished-1.png"
+      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-2d6201ef84c644f45c1b/test-finished-1.png"
     ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-f5decb18975722288a32/video.webm"
+    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-2d6201ef84c644f45c1b/video.webm"
   },
   {
     "port": 2004,
@@ -2542,7 +2325,7 @@
     "title": "count the number of products",
     "status": "passed",
     "flaky": "expected",
-    "duration": "01s:791ms",
+    "duration": "02s:159ms",
     "errors": [],
     "steps": [
       {
@@ -2573,15 +2356,15 @@
     "port": 2004,
     "annotations": [],
     "testTags": [],
-    "location": "end2end.spec.ts:38:5",
+    "location": "end2end.spec.ts:22:5",
     "retry": "",
     "isRetry": 0,
     "projectName": "chromium",
-    "suite": "Check the first and last product before applying filter and after applying the filter",
-    "title": "Check the first and last product before applying filter and after applying the filter",
+    "suite": "check the product available or not",
+    "title": "check the product available or not",
     "status": "passed",
     "flaky": "expected",
-    "duration": "01s:827ms",
+    "duration": "02s:168ms",
     "errors": [],
     "steps": [
       {
@@ -2591,7 +2374,7 @@
       },
       {
         "snippet": "",
-        "title": "Check the first and last product before and after applying filter",
+        "title": "Check the product availability",
         "location": ""
       },
       {
@@ -2604,9 +2387,9 @@
     "filePath": "end2end.spec.ts",
     "base64Image": false,
     "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-2d6201ef84c644f45c1b/test-finished-1.png"
+      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-f5decb18975722288a32/test-finished-1.png"
     ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-2d6201ef84c644f45c1b/video.webm"
+    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-f5decb18975722288a32/video.webm"
   },
   {
     "port": 2004,
@@ -2620,7 +2403,7 @@
     "title": "Add the product into the cart and assert if it is added or not",
     "status": "passed",
     "flaky": "expected",
-    "duration": "01s:883ms",
+    "duration": "02s:220ms",
     "errors": [],
     "steps": [
       {
@@ -2657,9 +2440,55 @@
     "projectName": "chromium",
     "suite": "Add to products into the cart",
     "title": "Add to products into the cart",
+    "status": "failed",
+    "flaky": "unexpected",
+    "duration": "02s:373ms",
+    "errors": [
+      "Error: expect(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#A00\">received<span style=\"color:var(--snippet-color)\">).<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">toBe(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#0A0\">expected<span style=\"color:var(--snippet-color)\">) // Object.is equality<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">\n\nExpected: <span style=\"color:#0A0\">false<span style=\"color:var(--snippet-color)\">\nReceived: <span style=\"color:#A00\">true<span style=\"color:var(--snippet-color)\">\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:99:18\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:59:5</span></span></span></span></span></span></span></span></span></span></span></span>"
+    ],
+    "steps": [
+      {
+        "snippet": "",
+        "title": "Before Hooks",
+        "location": ""
+      },
+      {
+        "snippet": " <span style=\"color:#555\">  97 |<span style=\"color:var(--snippet-color)\">     <span style=\"color:#0AA\">await<span style=\"color:var(--snippet-color)\"> cartPage<span style=\"color:#A50\">.<span style=\"color:var(--snippet-color)\">click(<span style=\"color:#0A0\">&#039;#back-to-products&#039;<span style=\"color:var(--snippet-color)\">)<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\">  98 |<span style=\"color:var(--snippet-color)\">     <span style=\"color:#0AA\">const<span style=\"color:var(--snippet-color)\"> test <span style=\"color:#A50\">=<span style=\"color:var(--snippet-color)\"> <span style=\"color:#0AA\">await<span style=\"color:var(--snippet-color)\"> cartPage<span style=\"color:#A50\">.<span style=\"color:var(--snippet-color)\">isVisibleText(<span style=\"color:#0A0\">&#039;.title&#039;<span style=\"color:var(--snippet-color)\">)<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n<span style=\"color:#A00\"><b>><span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:var(--snippet-color)\"><span style=\"color:#555\">  99 |<span style=\"color:var(--snippet-color)\">     expect(test)<span style=\"color:#A50\">.<span style=\"color:var(--snippet-color)\">toBe(<span style=\"color:#0AA\">false<span style=\"color:var(--snippet-color)\">)<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\">     |<span style=\"color:var(--snippet-color)\">                  <span style=\"color:#A00\"><b>^<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\"> 100 |<span style=\"color:var(--snippet-color)\"> })<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\"> 101 |<span style=\"color:var(--snippet-color)\"> })<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\"></span></span></span></span></span></span></span></span></span></span></b></span></span></span></span></span></span></span></span></span></span></span></span></span></b></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>",
+        "title": "Add multiple products to cart",
+        "location": "end2end.spec.ts:59:16"
+      },
+      {
+        "snippet": "",
+        "title": "After Hooks",
+        "location": ""
+      },
+      {
+        "snippet": "",
+        "title": "Worker Cleanup",
+        "location": ""
+      }
+    ],
+    "logs": "",
+    "filePath": "end2end.spec.ts",
+    "base64Image": false,
+    "screenshots": [
+      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-a47ff16d0817f0571ea8/test-failed-1.png"
+    ],
+    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-a47ff16d0817f0571ea8/video.webm"
+  },
+  {
+    "port": 2004,
+    "annotations": [],
+    "testTags": [],
+    "location": "end2end.spec.ts:22:5",
+    "retry": "",
+    "isRetry": 0,
+    "projectName": "firefox",
+    "suite": "check the product available or not",
+    "title": "check the product available or not",
     "status": "passed",
     "flaky": "expected",
-    "duration": "01s:572ms",
+    "duration": "02s:954ms",
     "errors": [],
     "steps": [
       {
@@ -2669,7 +2498,7 @@
       },
       {
         "snippet": "",
-        "title": "Add multiple products to cart",
+        "title": "Check the product availability",
         "location": ""
       },
       {
@@ -2682,9 +2511,9 @@
     "filePath": "end2end.spec.ts",
     "base64Image": false,
     "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-a47ff16d0817f0571ea8/test-finished-1.png"
+      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-d9398af780b95217e199/test-finished-1.png"
     ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-a47ff16d0817f0571ea8/video.webm"
+    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-d9398af780b95217e199/video.webm"
   },
   {
     "port": 2004,
@@ -2698,7 +2527,7 @@
     "title": "count the number of products",
     "status": "passed",
     "flaky": "expected",
-    "duration": "02s:626ms",
+    "duration": "02s:557ms",
     "errors": [],
     "steps": [
       {
@@ -2737,7 +2566,7 @@
     "title": "Add the product into the cart and assert if it is added or not",
     "status": "passed",
     "flaky": "expected",
-    "duration": "02s:272ms",
+    "duration": "02s:607ms",
     "errors": [],
     "steps": [
       {
@@ -2768,45 +2597,6 @@
     "port": 2004,
     "annotations": [],
     "testTags": [],
-    "location": "end2end.spec.ts:22:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "firefox",
-    "suite": "check the product available or not",
-    "title": "check the product available or not",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "02s:113ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Check the product availability",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-d9398af780b95217e199/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-d9398af780b95217e199/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
     "location": "end2end.spec.ts:38:5",
     "retry": "",
     "isRetry": 0,
@@ -2815,7 +2605,7 @@
     "title": "Check the first and last product before applying filter and after applying the filter",
     "status": "passed",
     "flaky": "expected",
-    "duration": "02s:264ms",
+    "duration": "02s:654ms",
     "errors": [],
     "steps": [
       {
@@ -2852,10 +2642,12 @@
     "projectName": "firefox",
     "suite": "Add to products into the cart",
     "title": "Add to products into the cart",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:665ms",
-    "errors": [],
+    "status": "failed",
+    "flaky": "unexpected",
+    "duration": "02s:092ms",
+    "errors": [
+      "Error: expect(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#A00\">received<span style=\"color:var(--snippet-color)\">).<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">toBe(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#0A0\">expected<span style=\"color:var(--snippet-color)\">) // Object.is equality<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">\n\nExpected: <span style=\"color:#0A0\">false<span style=\"color:var(--snippet-color)\">\nReceived: <span style=\"color:#A00\">true<span style=\"color:var(--snippet-color)\">\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:99:18\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:59:5</span></span></span></span></span></span></span></span></span></span></span></span>"
+    ],
     "steps": [
       {
         "snippet": "",
@@ -2863,13 +2655,18 @@
         "location": ""
       },
       {
-        "snippet": "",
+        "snippet": " <span style=\"color:#555\">  97 |<span style=\"color:var(--snippet-color)\">     <span style=\"color:#0AA\">await<span style=\"color:var(--snippet-color)\"> cartPage<span style=\"color:#A50\">.<span style=\"color:var(--snippet-color)\">click(<span style=\"color:#0A0\">&#039;#back-to-products&#039;<span style=\"color:var(--snippet-color)\">)<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\">  98 |<span style=\"color:var(--snippet-color)\">     <span style=\"color:#0AA\">const<span style=\"color:var(--snippet-color)\"> test <span style=\"color:#A50\">=<span style=\"color:var(--snippet-color)\"> <span style=\"color:#0AA\">await<span style=\"color:var(--snippet-color)\"> cartPage<span style=\"color:#A50\">.<span style=\"color:var(--snippet-color)\">isVisibleText(<span style=\"color:#0A0\">&#039;.title&#039;<span style=\"color:var(--snippet-color)\">)<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n<span style=\"color:#A00\"><b>><span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:var(--snippet-color)\"><span style=\"color:#555\">  99 |<span style=\"color:var(--snippet-color)\">     expect(test)<span style=\"color:#A50\">.<span style=\"color:var(--snippet-color)\">toBe(<span style=\"color:#0AA\">false<span style=\"color:var(--snippet-color)\">)<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\">     |<span style=\"color:var(--snippet-color)\">                  <span style=\"color:#A00\"><b>^<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\"> 100 |<span style=\"color:var(--snippet-color)\"> })<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\"> 101 |<span style=\"color:var(--snippet-color)\"> })<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\"></span></span></span></span></span></span></span></span></span></span></b></span></span></span></span></span></span></span></span></span></span></span></span></span></b></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>",
         "title": "Add multiple products to cart",
-        "location": ""
+        "location": "end2end.spec.ts:59:16"
       },
       {
         "snippet": "",
         "title": "After Hooks",
+        "location": ""
+      },
+      {
+        "snippet": "",
+        "title": "Worker Cleanup",
         "location": ""
       }
     ],
@@ -2877,7 +2674,7 @@
     "filePath": "end2end.spec.ts",
     "base64Image": false,
     "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-89fe3171683f3a3c91fc/test-finished-1.png"
+      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-89fe3171683f3a3c91fc/test-failed-1.png"
     ],
     "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-89fe3171683f3a3c91fc/video.webm"
   },
@@ -2893,7 +2690,7 @@
     "title": "count the number of products",
     "status": "passed",
     "flaky": "expected",
-    "duration": "01s:630ms",
+    "duration": "01s:809ms",
     "errors": [],
     "steps": [
       {
@@ -2932,7 +2729,7 @@
     "title": "check the product available or not",
     "status": "passed",
     "flaky": "expected",
-    "duration": "01s:679ms",
+    "duration": "01s:755ms",
     "errors": [],
     "steps": [
       {
@@ -2971,7 +2768,7 @@
     "title": "Add the product into the cart and assert if it is added or not",
     "status": "passed",
     "flaky": "expected",
-    "duration": "01s:254ms",
+    "duration": "01s:300ms",
     "errors": [],
     "steps": [
       {
@@ -3010,7 +2807,7 @@
     "title": "Check the first and last product before applying filter and after applying the filter",
     "status": "passed",
     "flaky": "expected",
-    "duration": "01s:201ms",
+    "duration": "01s:343ms",
     "errors": [],
     "steps": [
       {
@@ -3047,10 +2844,12 @@
     "projectName": "webkit",
     "suite": "Add to products into the cart",
     "title": "Add to products into the cart",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:663ms",
-    "errors": [],
+    "status": "failed",
+    "flaky": "unexpected",
+    "duration": "01s:256ms",
+    "errors": [
+      "Error: expect(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#A00\">received<span style=\"color:var(--snippet-color)\">).<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">toBe(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#0A0\">expected<span style=\"color:var(--snippet-color)\">) // Object.is equality<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">\n\nExpected: <span style=\"color:#0A0\">false<span style=\"color:var(--snippet-color)\">\nReceived: <span style=\"color:#A00\">true<span style=\"color:var(--snippet-color)\">\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:99:18\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:59:5</span></span></span></span></span></span></span></span></span></span></span></span>"
+    ],
     "steps": [
       {
         "snippet": "",
@@ -3058,13 +2857,18 @@
         "location": ""
       },
       {
-        "snippet": "",
+        "snippet": " <span style=\"color:#555\">  97 |<span style=\"color:var(--snippet-color)\">     <span style=\"color:#0AA\">await<span style=\"color:var(--snippet-color)\"> cartPage<span style=\"color:#A50\">.<span style=\"color:var(--snippet-color)\">click(<span style=\"color:#0A0\">&#039;#back-to-products&#039;<span style=\"color:var(--snippet-color)\">)<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\">  98 |<span style=\"color:var(--snippet-color)\">     <span style=\"color:#0AA\">const<span style=\"color:var(--snippet-color)\"> test <span style=\"color:#A50\">=<span style=\"color:var(--snippet-color)\"> <span style=\"color:#0AA\">await<span style=\"color:var(--snippet-color)\"> cartPage<span style=\"color:#A50\">.<span style=\"color:var(--snippet-color)\">isVisibleText(<span style=\"color:#0A0\">&#039;.title&#039;<span style=\"color:var(--snippet-color)\">)<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n<span style=\"color:#A00\"><b>><span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:var(--snippet-color)\"><span style=\"color:#555\">  99 |<span style=\"color:var(--snippet-color)\">     expect(test)<span style=\"color:#A50\">.<span style=\"color:var(--snippet-color)\">toBe(<span style=\"color:#0AA\">false<span style=\"color:var(--snippet-color)\">)<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\">     |<span style=\"color:var(--snippet-color)\">                  <span style=\"color:#A00\"><b>^<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\"> 100 |<span style=\"color:var(--snippet-color)\"> })<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\">\n <span style=\"color:#555\"> 101 |<span style=\"color:var(--snippet-color)\"> })<span style=\"color:#A50\">;<span style=\"color:var(--snippet-color)\"></span></span></span></span></span></span></span></span></span></span></b></span></span></span></span></span></span></span></span></span></span></span></span></span></b></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>",
         "title": "Add multiple products to cart",
-        "location": ""
+        "location": "end2end.spec.ts:59:16"
       },
       {
         "snippet": "",
         "title": "After Hooks",
+        "location": ""
+      },
+      {
+        "snippet": "",
+        "title": "Worker Cleanup",
         "location": ""
       }
     ],
@@ -3072,829 +2876,45 @@
     "filePath": "end2end.spec.ts",
     "base64Image": false,
     "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-bdb7ce0d5d9f95e40752/test-finished-1.png"
+      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-bdb7ce0d5d9f95e40752/test-failed-1.png"
     ],
     "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-bdb7ce0d5d9f95e40752/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:15:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Mobile Chrome",
-    "suite": "count the number of products",
-    "title": "count the number of products",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:524ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Count the number of products",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-40946445ab8c4322f35e/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-40946445ab8c4322f35e/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:22:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Mobile Chrome",
-    "suite": "check the product available or not",
-    "title": "check the product available or not",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:694ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Check the product availability",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-393417f51d79a1c305f6/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-393417f51d79a1c305f6/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:29:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Mobile Chrome",
-    "suite": "Add the product into the cart and assert if it is added or not",
-    "title": "Add the product into the cart and assert if it is added or not",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:523ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Add product to cart",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-8778d77d13b932b7c383/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-8778d77d13b932b7c383/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:38:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Mobile Chrome",
-    "suite": "Check the first and last product before applying filter and after applying the filter",
-    "title": "Check the first and last product before applying filter and after applying the filter",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:664ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Check the first and last product before and after applying filter",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-398e36efa35229359a8f/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-398e36efa35229359a8f/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:57:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Mobile Chrome",
-    "suite": "Add to products into the cart",
-    "title": "Add to products into the cart",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:773ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Add multiple products to cart",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-b0932d33dad076967783/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-b0932d33dad076967783/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:15:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Mobile Safari",
-    "suite": "count the number of products",
-    "title": "count the number of products",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:240ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Count the number of products",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-0d94c2b22f02d068ffde/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-0d94c2b22f02d068ffde/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:22:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Mobile Safari",
-    "suite": "check the product available or not",
-    "title": "check the product available or not",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:232ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Check the product availability",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-617e1ae045f7413f2f47/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-617e1ae045f7413f2f47/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:29:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Mobile Safari",
-    "suite": "Add the product into the cart and assert if it is added or not",
-    "title": "Add the product into the cart and assert if it is added or not",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:147ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Add product to cart",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-fd25b8fb4a0262eeb3d1/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-fd25b8fb4a0262eeb3d1/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:57:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Mobile Safari",
-    "suite": "Add to products into the cart",
-    "title": "Add to products into the cart",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:304ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Add multiple products to cart",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-27303238da1d15b7ba14/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-27303238da1d15b7ba14/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:38:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Mobile Safari",
-    "suite": "Check the first and last product before applying filter and after applying the filter",
-    "title": "Check the first and last product before applying filter and after applying the filter",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:011ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Check the first and last product before and after applying filter",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-97521315f4c2e8019d42/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-97521315f4c2e8019d42/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:22:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Microsoft Edge",
-    "suite": "check the product available or not",
-    "title": "check the product available or not",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:873ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Check the product availability",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-c3bb8fee99414319ff5c/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-c3bb8fee99414319ff5c/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:38:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Microsoft Edge",
-    "suite": "Check the first and last product before applying filter and after applying the filter",
-    "title": "Check the first and last product before applying filter and after applying the filter",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:916ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Check the first and last product before and after applying filter",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-41d38d95e5c33692603d/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-41d38d95e5c33692603d/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:29:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Microsoft Edge",
-    "suite": "Add the product into the cart and assert if it is added or not",
-    "title": "Add the product into the cart and assert if it is added or not",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:931ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Add product to cart",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-6f53f55d1f1709c85b22/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-6f53f55d1f1709c85b22/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:15:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Microsoft Edge",
-    "suite": "count the number of products",
-    "title": "count the number of products",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "02s:037ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Count the number of products",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-fa1d13342ca446cf1e2b/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-fa1d13342ca446cf1e2b/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:57:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Microsoft Edge",
-    "suite": "Add to products into the cart",
-    "title": "Add to products into the cart",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "02s:121ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Add multiple products to cart",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-b3487ba8c8e1eb929264/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-b3487ba8c8e1eb929264/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:15:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Google Chrome",
-    "suite": "count the number of products",
-    "title": "count the number of products",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:241ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Count the number of products",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-0d9846fc89c8e898622f/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-0d9846fc89c8e898622f/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:29:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Google Chrome",
-    "suite": "Add the product into the cart and assert if it is added or not",
-    "title": "Add the product into the cart and assert if it is added or not",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:427ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Add product to cart",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-cd2448e424439005dd65/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-cd2448e424439005dd65/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:57:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Google Chrome",
-    "suite": "Add to products into the cart",
-    "title": "Add to products into the cart",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:418ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Add multiple products to cart",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-cb4f406096e484b26b1b/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-cb4f406096e484b26b1b/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:22:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Google Chrome",
-    "suite": "check the product available or not",
-    "title": "check the product available or not",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "980ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Check the product availability",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-cead7a24ecb279b24ac5/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-cead7a24ecb279b24ac5/video.webm"
-  },
-  {
-    "port": 2004,
-    "annotations": [],
-    "testTags": [],
-    "location": "end2end.spec.ts:38:5",
-    "retry": "",
-    "isRetry": 0,
-    "projectName": "Google Chrome",
-    "suite": "Check the first and last product before applying filter and after applying the filter",
-    "title": "Check the first and last product before applying filter and after applying the filter",
-    "status": "passed",
-    "flaky": "expected",
-    "duration": "01s:067ms",
-    "errors": [],
-    "steps": [
-      {
-        "snippet": "",
-        "title": "Before Hooks",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "Check the first and last product before and after applying filter",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "After Hooks",
-        "location": ""
-      }
-    ],
-    "logs": "",
-    "filePath": "end2end.spec.ts",
-    "base64Image": false,
-    "screenshots": [
-      "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-a86ce14a0a367f986733/test-finished-1.png"
-    ],
-    "videoPath": "ortoni-data/attachments/13ab53e0dc6b09bf4c3c-a86ce14a0a367f986733/video.webm"
   }
 ];
             const testHistory = [
   {
-    "testId": "end2end.spec.ts:chromium:check the product available or not",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:741ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:926ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:chromium:count the number of products",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:791ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:928ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
     "testId": "end2end.spec.ts:chromium:Check the first and last product before applying filter and after applying the filter",
     "history": [
+      {
+        "status": "passed",
+        "duration": "01s:972ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:715ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:232ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:972ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:421ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
       {
         "status": "passed",
         "duration": "01s:827ms",
@@ -3910,8 +2930,132 @@
     ]
   },
   {
+    "testId": "end2end.spec.ts:chromium:count the number of products",
+    "history": [
+      {
+        "status": "passed",
+        "duration": "02s:159ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:592ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:178ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:939ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:233ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:791ms",
+        "error_message": "",
+        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:928ms",
+        "error_message": "",
+        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
+      }
+    ]
+  },
+  {
+    "testId": "end2end.spec.ts:chromium:check the product available or not",
+    "history": [
+      {
+        "status": "passed",
+        "duration": "02s:168ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:589ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:172ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:939ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:104ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:741ms",
+        "error_message": "",
+        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:926ms",
+        "error_message": "",
+        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
+      }
+    ]
+  },
+  {
     "testId": "end2end.spec.ts:chromium:Add the product into the cart and assert if it is added or not",
     "history": [
+      {
+        "status": "passed",
+        "duration": "02s:220ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:084ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:207ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:246ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:208ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
       {
         "status": "passed",
         "duration": "01s:883ms",
@@ -3930,6 +3074,36 @@
     "testId": "end2end.spec.ts:chromium:Add to products into the cart",
     "history": [
       {
+        "status": "failed",
+        "duration": "02s:373ms",
+        "error_message": "Error: expect(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#A00\">received<span style=\"color:var(--snippet-color)\">).<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">toBe(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#0A0\">expected<span style=\"color:var(--snippet-color)\">) // Object.is equality<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">\n\nExpected: <span style=\"color:#0A0\">false<span style=\"color:var(--snippet-color)\">\nReceived: <span style=\"color:#A00\">true<span style=\"color:var(--snippet-color)\">\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:99:18\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:59:5</span></span></span></span></span></span></span></span></span></span></span></span>",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:859ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:167ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:676ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:146ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
+      {
         "status": "passed",
         "duration": "01s:572ms",
         "error_message": "",
@@ -3944,8 +3118,85 @@
     ]
   },
   {
+    "testId": "end2end.spec.ts:firefox:check the product available or not",
+    "history": [
+      {
+        "status": "passed",
+        "duration": "02s:954ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:708ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:413ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:870ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:419ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:113ms",
+        "error_message": "",
+        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:815ms",
+        "error_message": "",
+        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
+      }
+    ]
+  },
+  {
     "testId": "end2end.spec.ts:firefox:count the number of products",
     "history": [
+      {
+        "status": "passed",
+        "duration": "02s:557ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:956ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:285ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:583ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:707ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
       {
         "status": "passed",
         "duration": "02s:626ms",
@@ -3965,6 +3216,36 @@
     "history": [
       {
         "status": "passed",
+        "duration": "02s:607ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:880ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:766ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:979ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:202ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
         "duration": "02s:272ms",
         "error_message": "",
         "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
@@ -3978,25 +3259,38 @@
     ]
   },
   {
-    "testId": "end2end.spec.ts:firefox:check the product available or not",
+    "testId": "end2end.spec.ts:firefox:Check the first and last product before applying filter and after applying the filter",
     "history": [
       {
         "status": "passed",
-        "duration": "02s:113ms",
+        "duration": "02s:654ms",
         "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
       },
       {
         "status": "passed",
-        "duration": "02s:815ms",
+        "duration": "02s:935ms",
         "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:firefox:Check the first and last product before applying filter and after applying the filter",
-    "history": [
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "05s:575ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:317ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "03s:384ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
       {
         "status": "passed",
         "duration": "02s:264ms",
@@ -4014,6 +3308,36 @@
   {
     "testId": "end2end.spec.ts:firefox:Add to products into the cart",
     "history": [
+      {
+        "status": "failed",
+        "duration": "02s:092ms",
+        "error_message": "Error: expect(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#A00\">received<span style=\"color:var(--snippet-color)\">).<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">toBe(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#0A0\">expected<span style=\"color:var(--snippet-color)\">) // Object.is equality<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">\n\nExpected: <span style=\"color:#0A0\">false<span style=\"color:var(--snippet-color)\">\nReceived: <span style=\"color:#A00\">true<span style=\"color:var(--snippet-color)\">\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:99:18\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:59:5</span></span></span></span></span></span></span></span></span></span></span></span>",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:841ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:836ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:726ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:850ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
       {
         "status": "passed",
         "duration": "01s:665ms",
@@ -4033,6 +3357,36 @@
     "history": [
       {
         "status": "passed",
+        "duration": "01s:809ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:689ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:838ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:873ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:343ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
         "duration": "01s:630ms",
         "error_message": "",
         "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
@@ -4048,6 +3402,36 @@
   {
     "testId": "end2end.spec.ts:webkit:check the product available or not",
     "history": [
+      {
+        "status": "passed",
+        "duration": "01s:755ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:699ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:744ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:908ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:373ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
       {
         "status": "passed",
         "duration": "01s:679ms",
@@ -4067,6 +3451,36 @@
     "history": [
       {
         "status": "passed",
+        "duration": "01s:300ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:348ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:294ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:680ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "02s:456ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
         "duration": "01s:254ms",
         "error_message": "",
         "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
@@ -4082,6 +3496,36 @@
   {
     "testId": "end2end.spec.ts:webkit:Check the first and last product before applying filter and after applying the filter",
     "history": [
+      {
+        "status": "passed",
+        "duration": "01s:343ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:249ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:208ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:284ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:608ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
       {
         "status": "passed",
         "duration": "01s:201ms",
@@ -4100,6 +3544,36 @@
     "testId": "end2end.spec.ts:webkit:Add to products into the cart",
     "history": [
       {
+        "status": "failed",
+        "duration": "01s:256ms",
+        "error_message": "Error: expect(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#A00\">received<span style=\"color:var(--snippet-color)\">).<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">toBe(<span style=\"font-weight:normal;text-decoration:none;font-style:normal\"><span style=\"color:#0A0\">expected<span style=\"color:var(--snippet-color)\">) // Object.is equality<span style=\"font-weight:normal;text-decoration:none;font-style:normal\">\n\nExpected: <span style=\"color:#0A0\">false<span style=\"color:var(--snippet-color)\">\nReceived: <span style=\"color:#A00\">true<span style=\"color:var(--snippet-color)\">\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:99:18\n    at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:59:5</span></span></span></span></span></span></span></span></span></span></span></span>",
+        "run_date": "Apr 20, 2025, 12:50 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:296ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:29 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:489ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:16 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:739ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:14 PM GMT+5:30"
+      },
+      {
+        "status": "passed",
+        "duration": "01s:980ms",
+        "error_message": "",
+        "run_date": "Apr 20, 2025, 12:05 PM GMT+5:30"
+      },
+      {
         "status": "passed",
         "duration": "01s:663ms",
         "error_message": "",
@@ -4108,346 +3582,6 @@
       {
         "status": "passed",
         "duration": "01s:774ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Mobile Chrome:count the number of products",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:524ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:920ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Mobile Chrome:check the product available or not",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:694ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:930ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Mobile Chrome:Add the product into the cart and assert if it is added or not",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:523ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:795ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Mobile Chrome:Check the first and last product before applying filter and after applying the filter",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:664ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:326ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Mobile Chrome:Add to products into the cart",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:773ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:873ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Mobile Safari:count the number of products",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:240ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:121ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Mobile Safari:check the product available or not",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:232ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:282ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Mobile Safari:Add the product into the cart and assert if it is added or not",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:147ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:098ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Mobile Safari:Add to products into the cart",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:304ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:320ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Mobile Safari:Check the first and last product before applying filter and after applying the filter",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:011ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:376ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Microsoft Edge:check the product available or not",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:873ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:592ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Microsoft Edge:Check the first and last product before applying filter and after applying the filter",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:916ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:556ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Microsoft Edge:Add the product into the cart and assert if it is added or not",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:931ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:634ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Microsoft Edge:count the number of products",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "02s:037ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:474ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Microsoft Edge:Add to products into the cart",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "02s:121ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "02s:105ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Google Chrome:count the number of products",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:241ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:261ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Google Chrome:Add the product into the cart and assert if it is added or not",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:427ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "02s:514ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Google Chrome:Add to products into the cart",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:418ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:471ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Google Chrome:check the product available or not",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "980ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:181ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
-      }
-    ]
-  },
-  {
-    "testId": "end2end.spec.ts:Google Chrome:Check the first and last product before applying filter and after applying the filter",
-    "history": [
-      {
-        "status": "passed",
-        "duration": "01s:067ms",
-        "error_message": "",
-        "run_date": "Apr 17, 2025, 09:59 AM GMT+5:30"
-      },
-      {
-        "status": "passed",
-        "duration": "01s:319ms",
         "error_message": "",
         "run_date": "Apr 17, 2025, 09:56 AM GMT+5:30"
       }

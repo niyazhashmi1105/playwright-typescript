@@ -96,6 +96,6 @@ test('Add to products into the cart', async ({ homePage, cartPage, page }) => {
     expect(orderDetails).toEqual('Your order has been dispatched, and will arrive just as fast as the pony can get there!');
     await cartPage.click('#back-to-products');
     const test = await cartPage.isVisibleText('.title');
-    expect(test).toBe(true);
+    expect(test).toBe(false);
 });
 });
