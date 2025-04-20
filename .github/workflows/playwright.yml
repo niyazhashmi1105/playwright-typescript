@@ -8,17 +8,17 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    services:
-      prometheus:
-        image: prom/prometheus
-        ports:
-          - 9090:9090
-        volumes:
-          - ./prometheus.yml:/etc/prometheus/prometheus.yml
-        options: --name prometheus
-
     steps:
     - uses: actions/checkout@v4
+    - name: Setup Prometheus
+      run: |
+        mkdir -p prometheus
+        cp prometheus.yml prometheus/prometheus.yml
+        docker run -d \
+          --name prometheus \
+          -p 9090:9090 \
+          -v ${{ github.workspace }}/prometheus:/etc/prometheus \
+          prom/prometheus
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
@@ -34,6 +34,7 @@ jobs:
       run: |
         sleep 5  # Give the metrics server time to start
         curl -f http://localhost:9323/metrics || echo "Metrics endpoint not accessible"
+        docker logs prometheus
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
