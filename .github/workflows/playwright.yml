@@ -76,10 +76,11 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
       
-    - name: Run Playwright tests with metrics
+    - name: Run Playwright tests with metrics and upload dashboard
       id: run-tests
       continue-on-error: true
       run: |
+        # Start the container and keep it running
         docker run -d \
           --name test-runner \
           --network monitoring-network \
@@ -92,22 +93,23 @@ jobs:
           -e PLAYWRIGHT_METRICS=${{ env.PLAYWRIGHT_METRICS }} \
           -p 9323:9323 \
           node:lts \
-          sh -c "npm install && npm run all:headless"
-      
-    - name: Wait for tests and collect metrics
-      run: |
-        docker logs -f test-runner || true
-        echo "Tests completed, metrics should be available in Grafana"
+          tail -f /dev/null
+
+        # Run tests
+        docker exec test-runner npm install
+        docker exec test-runner npm run all:headless
         
-    - name: Upload Grafana Dashboard
-      if: always()
-      run: |
+        # Upload dashboard
         docker exec \
           -e GRAFANA_API_KEY=${{ secrets.GRAFANA_API_KEY }} \
           -e GRAFANA_URL=${{ env.GRAFANA_URL }} \
           test-runner \
           npm run upload-dashboard
-        
+
+        # Stop the container
+        docker stop test-runner
+        docker rm test-runner
+      
     - name: Check Prometheus targets
       if: always()
       run: curl -s http://localhost:9090/api/v1/targets | jq .
