@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures/my-fixture';
 import * as fs from 'fs';
+import {PasswordUtils}  from '../utils/password-utils';
 
 interface TestData {
     std_user: string;
@@ -14,12 +15,14 @@ interface TestData {
 }
 
 const testData: TestData = JSON.parse(fs.readFileSync(`./testdata/data.json`, `utf-8`));
+const decodedPassword = PasswordUtils.decodePassword(testData.password);
+console.log("Decoded Password:", decodedPassword);
 
 test.beforeEach('prerequisite- login to application and landing on the homepage', async ({ loginPage }) => {
     await test.step('Login to application', async () => {
         await loginPage.navigateToURL('https://www.saucedemo.com/');
         expect(await loginPage.isVisibleText('#login-button')).toBeTruthy();
-        await loginPage.doLogin(testData.std_user, testData.password);
+        await loginPage.doLogin(testData.std_user, decodedPassword);
     });
 });
 
