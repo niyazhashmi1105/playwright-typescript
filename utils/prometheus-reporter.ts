@@ -13,10 +13,12 @@ export default class PrometheusReporter implements Reporter {
     private browserMetricsGauge: Gauge<string>;
     private errorCounter: Counter<string>;
     private memoryGauge: Gauge<string>;
+    private isGitHubAction: boolean;
 
     constructor() {
         const port = process.env.METRICS_PORT ? parseInt(process.env.METRICS_PORT) : 9323;
         this.metricsServer = new MetricsServer(port);
+        this.isGitHubAction = process.env.GITHUB_ACTIONS === 'true';
         const registry = this.metricsServer.getRegistry();
 
         this.testCounter = new Counter({
@@ -197,25 +199,23 @@ export default class PrometheusReporter implements Reporter {
     }
 
     async onEnd(): Promise<void> {
-        console.log('Tests completed - keeping metrics server running...');
+        console.log('Tests completed - finalizing metrics...');
         
-        // Keep the server running and handle process signals
+        // In GitHub Actions, we close the server immediately
+        if (this.isGitHubAction) {
+            await this.metricsServer.close();
+            console.log('Metrics server closed');
+            return;
+        }
+
+        // For local development, keep the server running with Ctrl+C handler
         process.on('SIGINT', async () => {
             console.log('Received SIGINT, shutting down metrics server...');
             await this.metricsServer.close();
             process.exit(0);
         });
 
-        process.on('SIGTERM', async () => {
-            console.log('Received SIGTERM, shutting down metrics server...');
-            await this.metricsServer.close();
-            process.exit(0);
-        });
-
-        // Keep the process running
-        await new Promise(() => {
-            console.log('Metrics server running at http://localhost:9323/metrics');
-            console.log('Press Ctrl+C to stop');
-        });
+        console.log('Metrics server running at http://localhost:9323/metrics');
+        console.log('Press Ctrl+C to stop');
     }
 }
