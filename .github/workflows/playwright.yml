@@ -40,8 +40,9 @@ jobs:
           -p 3000:3000 \
           -e "GF_AUTH_ANONYMOUS_ENABLED=true" \
           -e "GF_AUTH_ANONYMOUS_ORG_ROLE=Admin" \
+          -e "GF_AUTH_API_KEY=${{ secrets.GRAFANA_API_KEY }}" \
           grafana/grafana
-        
+
     - name: Configure Grafana Datasource and Dashboard
       run: |
         # Wait for Grafana to be ready
@@ -75,6 +76,8 @@ jobs:
           -v ${{ github.workspace }}:/app \
           -w /app \
           -e METRICS_PORT=9323 \
+          -e GRAFANA_API_KEY=${{ secrets.GRAFANA_API_KEY }} \
+          -e GRAFANA_URL=http://grafana:3000 \
           -p 9323:9323 \
           node:lts \
           sh -c "npm install && PLAYWRIGHT_METRICS=true npm run all:headless"
@@ -84,12 +87,17 @@ jobs:
         docker logs -f test-runner || true
         echo "Tests completed, metrics should be available in Grafana"
         
+    - name: Upload Grafana Dashboard
+      run: npm run upload-dashboard
+        
     - name: Check Prometheus targets
       run: curl -s http://localhost:9090/api/v1/targets | jq .
         
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
-        name: playwright-report
-        path: my-report/
-        retention-days: 7
+        name: test-reports
+        path: |
+          my-report/
+          playwright-report/
+        retention-days: 1

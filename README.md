@@ -1,49 +1,69 @@
-# Playwright TypeScript Test Framework
+# Playwright Test Automation Framework
 
-This repository contains an end-to-end testing framework built with Playwright and TypeScript, featuring BrowserStack integration, comprehensive reporting with Allure, and metrics monitoring using Prometheus and Grafana.
+This repository contains an end-to-end test automation framework using Playwright with TypeScript, including test metrics collection, monitoring, and reporting capabilities.
 
 ## Features
 
+- End-to-end testing using Playwright
 - TypeScript support
 - Cross-browser testing (Chromium, Firefox, WebKit)
-- BrowserStack integration for cloud testing
-- Allure reporting
-- Prometheus metrics
-- Grafana dashboards
-- GitHub Actions CI/CD integration
-- Parallel test execution
-- Video recording and screenshot capture
+- Test metrics collection with Prometheus
+- Metrics visualization with Grafana
+- Multiple reporting options:
+  - HTML reports
+  - Allure reports
+  - Ortoni custom reports
+- BrowserStack integration
+- GitHub Actions CI/CD pipeline
 
 ## Prerequisites
 
 - Node.js (LTS version)
-- npm (Node Package Manager)
-- Docker (for metrics and monitoring)
+- Docker (for running Prometheus and Grafana)
+- BrowserStack account (optional, for cross-browser testing)
 
-## Setup
+## Installation
 
-1. Clone the repository
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd playwright-typescript
+```
+
 2. Install dependencies:
 ```bash
 npm install
 ```
+
 3. Install Playwright browsers:
 ```bash
-npx playwright install --with-deps
+npx playwright install
 ```
 
-4. Create a `.env` file in the root directory with your BrowserStack credentials:
-```bash
-BROWSERSTACK_USERNAME=your_username
-BROWSERSTACK_ACCESS_KEY=your_access_key
+## Environment Setup
+
+1. Create a `.env` file in the project root with the following configurations:
+```env
+ENV=qa
+URL=<your-application-url>
+BROWSERSTACK_USERNAME=<your-browserstack-username>
+BROWSERSTACK_ACCESS_KEY=<your-browserstack-access-key>
+GRAFANA_API_KEY=<your-grafana-api-key>
+GRAFANA_URL=http://localhost:3000
 ```
 
-## Available Commands
+## Running Tests
 
-### Local Test Execution
-- Run all tests headless:
+### Local Execution
+
+- Run all tests headlessly:
 ```bash
 npm run all:headless
+```
+
+- Run tests in Chromium with UI:
+```bash
+npm run chrome:ui
 ```
 
 - Run all tests with UI:
@@ -51,127 +71,81 @@ npm run all:headless
 npm run all:ui
 ```
 
-- Run Chrome-only tests with UI:
-```bash
-npm run chrome:ui
-```
+### BrowserStack Execution
 
-### BrowserStack Test Execution
 - Run tests on BrowserStack:
 ```bash
 npm run browserstack-playwright
 ```
 
-- Execute tests with report generation:
+- Run with reports:
 ```bash
-npm run execute-tests
+npm run execute-tests-browserstack
 ```
 
-### Reporting
-- Generate Allure report:
-```bash
-npm run allure:generate
-```
+## Test Reports
 
-- Open Allure report:
-```bash
-npm run allure:open
-```
+### HTML Report
+- Available after test execution in `playwright-report/` directory
+- Access via `npx playwright show-report`
+
+### Allure Report
+- Generate report: `npm run allure:generate`
+- Open report: `npm run allure:open`
+
+### Ortoni Report
+- Available in `my-report/` directory after test execution
+
+## Metrics and Monitoring
+
+### Prometheus Setup
+- Metrics exposed on port 9323
+- Configure in `prometheus/prometheus.yml`
+
+### Grafana Dashboard
+- Access at http://localhost:3000
+- Upload dashboard: `npm run upload-dashboard`
+- Default credentials: admin/admin
+
+## Docker Containers
+
+The project uses Docker containers for:
+- Prometheus (Metrics collection)
+- Grafana (Metrics visualization)
+- Test execution in CI/CD
+
+## CI/CD Pipeline
+
+GitHub Actions workflow includes:
+1. Setting up test environment
+2. Installing dependencies
+3. Running tests with metrics collection
+4. Uploading test results and reports
+5. Publishing metrics to Grafana
+6. Storing test artifacts
 
 ## Project Structure
 
-- `/tests` - Test files
-- `/pages` - Page Object Models
-- `/fixtures` - Test fixtures and shared configurations
-- `/utils` - Utility functions and helpers
-- `/testdata` - Test data files
-- `/allure-results` - Raw test results
-- `/allure-report` - Generated HTML reports
-- `/prometheus` - Prometheus configuration
-- `/my-report` - Custom test reports
-
-## Configuration Files
-
-- `playwright.config.ts` - Main Playwright configuration
-- `browserstack.yml` - BrowserStack configuration
-- `.github/workflows/playwright.yml` - GitHub Actions workflow
-
-## Monitoring Setup
-
-The framework includes Prometheus and Grafana integration for test metrics monitoring:
-
-1. Prometheus metrics are exposed on port 9323
-2. Grafana dashboards are available on port 3000
-3. Metrics are automatically collected during test execution
-
-### Starting the Monitoring Stack
-```bash
-npm run monitor:start
 ```
-This will:
-- Start Prometheus and the test runner containers
-- Set up the metrics collection
-- Verify the health of both services
-
-### Checking Metrics Status
-```bash
-npm run monitor:health
+playwright-typescript/
+├── fixtures/          # Test fixtures
+├── grafana/          # Grafana dashboards
+├── pages/            # Page objects
+├── prometheus/       # Prometheus configuration
+├── scripts/         # Utility scripts
+├── tests/           # Test files
+├── utils/           # Helper utilities
+└── testdata/        # Test data files
 ```
-This will show:
-- Metrics server health status
-- Current collected metrics
-- Prometheus connection status
-- Target scraping status
-
-### Viewing Metrics
-- Prometheus UI: http://localhost:9090
-- Raw metrics: http://localhost:9323/metrics
-- Health check: http://localhost:9323/health
-
-### Stopping the Stack
-```bash
-npm run monitor:stop
-```
-
-### Available Metrics
-- `playwright_test_total`: Total number of tests executed (labels: status, browser, suite)
-- `playwright_test_duration_seconds`: Test execution time (labels: test_name, browser, suite)
-- `playwright_test_retries_total`: Number of test retries (labels: test_name, browser)
-
-## CI/CD Integration
-
-The project includes GitHub Actions workflow that:
-- Runs tests on push/PR to main/master branches
-- Sets up monitoring infrastructure
-- Generates and uploads test reports
-- Collects and visualizes metrics
-
-## Reports
-
-The framework generates multiple types of reports:
-1. Allure Reports - Detailed test execution reports
-2. Playwright HTML reports
-3. Custom reports in /my-report directory
-4. BrowserStack test execution reports
-
-## Browsers and Platforms
-
-Tests can be executed on:
-- Local browsers (Chromium, Firefox, WebKit)
-- BrowserStack platforms:
-  - Windows 10/11
-  - macOS Ventura/Sequoia
-  - Multiple browser versions
-  - Mobile devices (configurable)
 
 ## Contributing
 
-1. Create a feature branch
-2. Make your changes
-3. Submit a pull request
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-## Troubleshooting
+## License
 
-- For BrowserStack issues, check browserstack.err log
-- For local execution issues, check the test-results directory
-- For monitoring issues, verify prometheus/grafana container logs
+ISC License

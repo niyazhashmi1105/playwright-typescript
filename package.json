@@ -12,7 +12,8 @@
     "allure:open": "allure open allure-report",
     "browserstack-playwright": "npx browserstack-node-sdk playwright test end2end.spec.ts",
     "execute-tests": "npm run browserstack-playwright || true && npm run allure:generate && npm run allure:open",
-    "execute-tests-browserstack": "browserstack-node-sdk npm run browserstack-playwright || true && npm run allure:generate && npm run allure:open"
+    "execute-tests-browserstack": "browserstack-node-sdk npm run browserstack-playwright || true && npm run allure:generate && npm run allure:open",
+    "upload-dashboard": "node scripts/upload-dashboard.js"
   },
   "keywords": [],
   "author": "",
