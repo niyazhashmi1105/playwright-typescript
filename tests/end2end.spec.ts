@@ -16,7 +16,6 @@ interface TestData {
 
 const testData: TestData = JSON.parse(fs.readFileSync(`./testdata/data.json`, `utf-8`));
 const decodedPassword = PasswordUtils.decodePassword(testData.password);
-console.log("Decoded Password:", decodedPassword);
 
 test.beforeEach('prerequisite- login to application and landing on the homepage', async ({ loginPage }) => {
     await test.step('Login to application', async () => {
