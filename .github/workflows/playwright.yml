@@ -97,6 +97,7 @@ jobs:
 
         # Run tests
         docker exec test-runner npm install
+        docker exec test-runner npx playwright install --with-deps
         docker exec test-runner npm run all:headless
         
         # Upload dashboard
