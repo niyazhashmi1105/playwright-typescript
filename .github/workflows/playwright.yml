@@ -101,7 +101,12 @@ jobs:
         
     - name: Upload Grafana Dashboard
       if: always()
-      run: npm run upload-dashboard
+      run: |
+        docker exec \
+          -e GRAFANA_API_KEY=${{ secrets.GRAFANA_API_KEY }} \
+          -e GRAFANA_URL=${{ env.GRAFANA_URL }} \
+          test-runner \
+          npm run upload-dashboard
         
     - name: Check Prometheus targets
       if: always()
