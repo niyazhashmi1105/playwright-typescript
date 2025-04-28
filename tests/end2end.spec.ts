@@ -75,13 +75,13 @@ test('Add to products into the cart', async ({ homePage, cartPage, page }) => {
     await test.step('Add multiple products to cart', async () => {
         // Adding products to cart
         await homePage.addProductToCart(testData.addProductCart1, '#add-to-cart-sauce-labs-backpack');
-        expect(await page.locator('#remove-sauce-labs-backpack')).toBeVisible();
+        expect(page.locator('#remove-sauce-labs-backpack')).toBeVisible();
         
         await homePage.addProductToCart(testData.addProductCart2, '#add-to-cart-sauce-labs-bolt-t-shirt');
-        expect(await page.locator('#remove-sauce-labs-bolt-t-shirt')).toBeVisible();
+        expect(page.locator('#remove-sauce-labs-bolt-t-shirt')).toBeVisible();
         
         await homePage.addProductToCart(testData.addProductCart3, "//button[@id='add-to-cart-test.allthethings()-t-shirt-(red)']");
-        expect(await page.locator("//button[@id='remove-test.allthethings()-t-shirt-(red)']")).toBeVisible();
+        expect(page.locator("//button[@id='remove-test.allthethings()-t-shirt-(red)']")).toBeVisible();
         expect(await page.locator('.shopping_cart_link > span').textContent()).toBe('3');
 
         await cartPage.click('.shopping_cart_link');
@@ -116,6 +116,6 @@ test('Add to products into the cart', async ({ homePage, cartPage, page }) => {
 
         await cartPage.click('#back-to-products');
         const test = await cartPage.isVisibleText('.title');
-        expect(test).toBe(true);
+        expect(test).toBe(true); // Changed from false to true since the title should be visible on the products page
     });
 });

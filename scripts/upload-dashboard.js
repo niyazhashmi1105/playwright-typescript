@@ -38,28 +38,22 @@ async function uploadDashboard() {
         const reqLib = GRAFANA_URL.startsWith('https') ? https : http;
         const req = reqLib.request(options, (res) => {
             let data = '';
-            res.on('data', (chunk) => data += chunk);
+            res.on('data', chunk => data += chunk);
             res.on('end', () => {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                     console.log('Dashboard uploaded successfully!');
-                    console.log(data);
-                    resolve(data);
+                    resolve(JSON.parse(data));
                 } else {
                     reject(new Error(`Failed to upload dashboard: ${res.statusCode} ${data}`));
                 }
             });
         });
-
-        req.on('error', (error) => {
-            reject(error);
-        });
-
+        
+        req.on('error', reject);
         req.write(JSON.stringify(payload));
         req.end();
     });
 }
 
-uploadDashboard().catch(error => {
-    console.error(error);
-    process.exit(1);
-});
+// Export the function
+module.exports = uploadDashboard;

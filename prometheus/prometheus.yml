@@ -2,8 +2,17 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - 'alertmanager:9093'
+
+rule_files:
+  - '/etc/prometheus/alert.rules.yml'
+
 scrape_configs:
   - job_name: 'playwright-tests'
     static_configs:
-      - targets: ['localhost:9323']
+      - targets: ['host.docker.internal:9323', 'host.docker.internal:9324', 'host.docker.internal:9325']
     metrics_path: '/metrics'

@@ -42,6 +42,18 @@ npx playwright install
 
 ## Environment Setup
 
+1. Create a `.env` file in the root directory by copying the template:
+```bash
+cp .env.example .env
+```
+
+2. Update the `.env` file with your actual values:
+- SMTP settings for email notifications
+- Grafana admin credentials
+- AlertManager email configuration
+
+Note: Never commit the `.env` file to version control. The `.env.example` file serves as a template with placeholder values.
+
 1. Create a `.env` file in the project root with the following configurations:
 ```env
 ENV=qa
@@ -51,6 +63,16 @@ BROWSERSTACK_ACCESS_KEY=<your-browserstack-access-key>
 GRAFANA_API_KEY=<your-grafana-api-key>
 GRAFANA_URL=http://localhost:3000
 ```
+
+## Email Configuration
+
+For Gmail users:
+1. Enable 2-Step Verification in your Google Account
+2. Generate an App Password:
+   - Go to Google Account Settings > Security
+   - Under "Signing in to Google" find App Passwords
+   - Select "Mail" and your device
+   - Use the generated 16-character password in your .env file
 
 ## Running Tests
 
@@ -81,6 +103,18 @@ npm run browserstack-playwright
 - Run with reports:
 ```bash
 npm run execute-tests-browserstack
+```
+
+## Running the Framework
+
+1. Set up environment variables as described above
+2. Start the monitoring stack:
+```bash
+docker-compose up -d
+```
+3. Run tests:
+```bash
+npx playwright test
 ```
 
 ## Test Reports

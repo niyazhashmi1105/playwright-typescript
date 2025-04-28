@@ -8,6 +8,9 @@ if (!process.env.CI) {
   dotenv.config({ path: path.resolve(__dirname, '.env') });
 }
 
+// Set default metrics port if not specified
+process.env.METRICS_PORT = process.env.METRICS_PORT || '9323';
+
 // Get environment variables with fallbacks
 const getEnvVariable = (key: string): string => {
   return process.env[key] || '';
@@ -53,13 +56,12 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ['html',{open:'never'}],
-    ['allure-playwright', {
-      outputFolder: 'allure-results',
-      detail: true,
-      suiteTitle: true
-    }],
-    ['./utils/prometheus-reporter.ts'],
+    ['html'],
+    ['list'],
+    ['allure-playwright'],
+    ['json', { outputFile: 'test-results/test-results.json' }],
+    ['./utils/email-reporter.ts'],
+    ['./utils/prometheus-reporter.ts']
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -68,8 +70,8 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    screenshot:'on',
-    video:"on",
+    screenshot:'only-on-failure',
+    //video:"on",
   },
 
   /* Configure projects for major browsers */
@@ -87,6 +89,26 @@ export default defineConfig({
     {
       name: 'webkit',
       use:{browserName:'webkit'},
+    },
+    
+    /* Test against mobile viewports. */
+    // {
+    //   name: 'Mobile Chrome',
+    //   use: { ...devices['Pixel 5'] },
+    // },
+    // {
+    //   name: 'Mobile Safari',
+    //   use: { ...devices['iPhone 12'] },
+    // },
+
+    /* Test against branded browsers. */
+    {
+      name: 'Microsoft Edge',
+      use: { ...devices['Desktop Edge'], channel: 'msedge' },
+    },
+    {
+       name: 'Google Chrome',
+       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     },
   ]
 });

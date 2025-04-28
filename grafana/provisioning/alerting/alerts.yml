@@ -1,0 +1,111 @@
+apiVersion: 1
+
+groups:
+  - name: Playwright Test Alerts
+    folder: Playwright
+    interval: 1m
+    rules:
+      - uid: high_test_failure_rate
+        title: High Test Failure Rate
+        name: High Test Failure Rate
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(playwright_tests_total{status="failed"}[5m])) / sum(increase(playwright_tests_total[5m])) > 0.1
+              intervalMs: 1000
+              maxDataPoints: 43200
+        condition: A
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: High test failure rate detected
+          description: "More than 10% of tests are failing in the last 5 minutes. Current failure rate: {{ printf \"%.2f%%\" (multiply .Value 100) }}"
+          
+      - uid: slow_test_duration
+        title: Slow Test Duration
+        name: Slow Test Duration
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: rate(playwright_test_duration_seconds_sum[5m]) > 300
+              intervalMs: 1000
+              maxDataPoints: 43200
+        condition: A
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Tests are running slower than expected
+          description: "Test duration is higher than normal. Current duration: {{ printf \"%.2fs\" .Value }}"
+
+      - uid: browser_specific_failures
+        title: Browser-specific Failures
+        name: Browser-specific Failures
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum by (browser) (increase(playwright_tests_total{status="failed"}[5m])) > 2
+              intervalMs: 1000
+              maxDataPoints: 43200
+        condition: A
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Multiple failures detected in specific browser
+          description: "{{ .Labels.browser }} has {{ printf \"%.0f\" .Value }} test failures in the last 5 minutes"
+
+      - uid: memory_usage_alert
+        title: Memory Usage Alert
+        name: Memory Usage Alert
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: max(playwright_memory_usage_bytes) > 1000000000
+              intervalMs: 1000
+              maxDataPoints: 43200
+        condition: A
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage detected
+          description: "Memory usage exceeds 1GB. Current usage: {{ printf \"%.2f MB\" (divideFloat .Value 1048576) }}"
+
+      - uid: test_step_failure_rate
+        title: Test Step Failure Rate
+        name: Test Step Failure Rate
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(playwright_test_steps_total{status="failed"}[5m])) / sum(increase(playwright_test_steps_total[5m])) > 0.15
+              intervalMs: 1000
+              maxDataPoints: 43200
+        condition: A
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: High test step failure rate
+          description: "More than 15% of test steps are failing. Current failure rate: {{ printf \"%.2f%%\" (multiply .Value 100) }}"

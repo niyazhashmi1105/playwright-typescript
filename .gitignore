@@ -1,19 +1,40 @@
-
-# Playwright
-node_modules/
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-log/
-local.log
-*.obs*
-allure-report/
-allure-results/
+# Environment variables
 .env
-browserstack.err
-browser*.json
+.env.*
+!.env.example
+
+# Logs
+log/*
+!log/.gitkeep
 *.log
-playwright-browserstack*.json  
+
+# Dependencies
+node_modules/
+
+# Test results and reports
+test-results/
+playwright-report/
+allure-results/
+allure-report/
+my-report/ortoni-data/
+my-report/ortoni-data-history.sqlite
+my-report/trace/
+!my-report/index.html
+
+# Docker volumes
+prometheus_data/
+grafana_data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
 .DS_Store
-/my-report/*
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp

@@ -1,0 +1,38 @@
+groups:
+- name: playwright_alerts
+  rules:
+  - alert: TestFailures
+    expr: sum(playwright_tests_total{status="failed"}) > 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: Test failures detected
+      description: One or more Playwright tests have failed
+
+  - alert: HighTestDuration
+    expr: rate(playwright_test_duration_seconds_sum[1m]) > 300
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: Tests running slower than expected
+      description: Average test duration is higher than 5 minutes
+
+  - alert: BrowserSpecificFailures
+    expr: sum by (browser) (playwright_tests_total{status="failed"}) > 0
+    for: 30s
+    labels:
+      severity: warning
+    annotations:
+      summary: Browser-specific test failures
+      description: "{{ $labels.browser }} has test failures"
+
+  - alert: HighMemoryUsage
+    expr: process_resident_memory_bytes > 1000000000
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: High memory usage in test execution
+      description: Memory usage exceeds 1GB

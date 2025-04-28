@@ -7,14 +7,13 @@ export class MetricsServer {
     private port: number;
     private server: any;
 
-    constructor(port: number = 9323) {  // Explicitly set default port to 9323
+    constructor(port: number = 9323) {
         this.port = port;
         this.registry = new Registry();
         collectDefaultMetrics({ register: this.registry });
 
         // Add endpoint for metrics
         this.app.get('/metrics', async (req: express.Request, res: express.Response): Promise<void> => {
-            console.log('Metrics endpoint accessed');
             res.setHeader('Content-Type', this.registry.contentType);
             const metrics: string = await this.registry.metrics();
             res.send(metrics);
@@ -22,7 +21,6 @@ export class MetricsServer {
 
         // Add a health check endpoint
         this.app.get('/health', (req: express.Request, res: express.Response) => {
-            console.log('Health check endpoint called');
             res.status(200).send('OK');
         });
     }
@@ -32,13 +30,35 @@ export class MetricsServer {
     }
 
     public start(): void {
-        try {
-            this.server = this.app.listen(this.port, '0.0.0.0', () => {
-                console.log(`Metrics server listening at http://localhost:${this.port}/metrics`);
+        const tryPort = (port: number): Promise<number> => {
+            return new Promise((resolve, reject) => {
+                const server = this.app.listen(port, '0.0.0.0')
+                    .once('listening', () => {
+                        this.server = server;
+                        resolve(port);
+                    })
+                    .once('error', (err: any) => {
+                        if (err.code === 'EADDRINUSE') {
+                            // Try next port
+                            resolve(tryPort(port + 1));
+                        } else {
+                            reject(err);
+                        }
+                    });
             });
-        } catch (error) {
-            console.error(`Failed to start metrics server: ${error.message}`);
-        }
+        };
+
+        tryPort(this.port)
+            .then(actualPort => {
+                console.log(`Metrics server listening at http://localhost:${actualPort}/metrics`);
+                // Update Prometheus target if needed
+                if (actualPort !== this.port) {
+                    console.log(`Note: Using port ${actualPort} instead of configured port ${this.port}`);
+                }
+            })
+            .catch(error => {
+                console.error(`Failed to start metrics server: ${error.message}`);
+            });
     }
 
     public async close(): Promise<void> {

@@ -8,12 +8,10 @@
     "all:headless": "npx playwright test end2end.spec.ts",
     "postinstall": "npm update browserstack-node-sdk",
     "chrome:ui-browserstack": "npx browserstack-node-sdk playwright test --project chromium --headed end2end.spec.ts",
-    "allure:generate": "allure generate allure-results -o allure-report --clean",
-    "allure:open": "allure open allure-report",
-    "browserstack-playwright": "npx browserstack-node-sdk playwright test end2end.spec.ts",
-    "execute-tests": "npm run browserstack-playwright || true && npm run allure:generate && npm run allure:open",
-    "execute-tests-browserstack": "browserstack-node-sdk npm run browserstack-playwright || true && npm run allure:generate && npm run allure:open",
-    "upload-dashboard": "node scripts/upload-dashboard.js"
+    "show:report": "npx playwright show-report playwright-report",
+    "browserstack:playwright": "npx browserstack-node-sdk playwright test end2end.spec.ts",
+    "execute:tests": "npm run browserstack:playwright || true && npm run show:report",
+    "post:test": "node scripts/post-test.js"
   },
   "keywords": [],
   "author": "",
@@ -31,7 +29,10 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@types/nodemailer": "^6.4.17",
+    "axios": "^1.6.7",
     "express": "^4.21.2",
+    "nodemailer": "^6.10.1",
     "prom-client": "^15.1.3"
   }
 }

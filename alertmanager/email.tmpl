@@ -1,0 +1,96 @@
+{{ define "email.subject" }}
+[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] Playwright Test Alert - {{ .CommonLabels.alertname }}
+{{ end }}
+
+{{ define "email.html" }}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Alert Notification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .header {
+      background-color: {{ if eq .Status "firing" }}#dc3545{{ else }}#28a745{{ end }};
+      color: white;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .alert {
+      border-left: 4px solid {{ if eq .Status "firing" }}#dc3545{{ else }}#28a745{{ end }};
+      margin-bottom: 15px;
+      padding: 15px;
+      background-color: #f8f9fa;
+    }
+    .label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .value {
+      color: #666;
+    }
+    .timestamp {
+      font-size: 0.9em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2 style="margin: 0;">{{ .Status | toUpper }}: {{ .CommonLabels.alertname }}</h2>
+      <p style="margin: 10px 0 0 0;">{{ if eq .Status "firing" }}{{ .Alerts.Firing | len }}{{ else }}{{ .Alerts.Resolved | len }}{{ end }} alert(s) {{ .Status }}</p>
+    </div>
+
+    {{ if gt (len .Alerts.Firing) 0 }}
+    <h3>🔴 Firing Alerts</h3>
+    {{ range .Alerts.Firing }}
+    <div class="alert">
+      <div><span class="label">Alert:</span> <span class="value">{{ .Labels.alertname }}</span></div>
+      <div><span class="label">Severity:</span> <span class="value">{{ .Labels.severity }}</span></div>
+      {{ if .Labels.browser }}<div><span class="label">Browser:</span> <span class="value">{{ .Labels.browser }}</span></div>{{ end }}
+      <div><span class="label">Summary:</span> <span class="value">{{ .Annotations.summary }}</span></div>
+      <div><span class="label">Description:</span> <span class="value">{{ .Annotations.description }}</span></div>
+      <div class="timestamp">Started: {{ .StartsAt.Format "2006-01-02 15:04:05 MST" }}</div>
+    </div>
+    {{ end }}
+    {{ end }}
+
+    {{ if gt (len .Alerts.Resolved) 0 }}
+    <h3>✅ Resolved Alerts</h3>
+    {{ range .Alerts.Resolved }}
+    <div class="alert">
+      <div><span class="label">Alert:</span> <span class="value">{{ .Labels.alertname }}</span></div>
+      <div><span class="label">Severity:</span> <span class="value">{{ .Labels.severity }}</span></div>
+      {{ if .Labels.browser }}<div><span class="label">Browser:</span> <span class="value">{{ .Labels.browser }}</span></div>{{ end }}
+      <div><span class="label">Summary:</span> <span class="value">{{ .Annotations.summary }}</span></div>
+      <div><span class="label">Description:</span> <span class="value">{{ .Annotations.description }}</span></div>
+      <div class="timestamp">
+        Started: {{ .StartsAt.Format "2006-01-02 15:04:05 MST" }}<br>
+        Ended: {{ .EndsAt.Format "2006-01-02 15:04:05 MST" }}
+      </div>
+    </div>
+    {{ end }}
+    {{ end }}
+
+    <p style="font-size: 0.8em; color: #666; margin-top: 20px; text-align: center;">
+      View these alerts in <a href="{{ .ExternalURL }}">Prometheus AlertManager</a>
+    </p>
+  </div>
+</body>
+</html>
+{{ end }}
