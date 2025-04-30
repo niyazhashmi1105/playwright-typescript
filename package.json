@@ -11,7 +11,8 @@
     "show:report": "npx playwright show-report playwright-report",
     "browserstack:playwright": "npx browserstack-node-sdk playwright test end2end.spec.ts",
     "execute:tests": "npm run browserstack:playwright || true && npm run show:report",
-    "post:test": "node scripts/post-test.js"
+    "post:test": "node scripts/post-test.js",
+    "upload:dashboard": "node scripts/upload-dashboard.js"
   },
   "keywords": [],
   "author": "",

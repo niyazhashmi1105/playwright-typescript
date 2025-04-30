@@ -1,19 +1,23 @@
 name: Playwright Tests with Metrics
 on:
-  workflow_dispatch:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1, 2]
+      fail-fast: false
     
     env:
       GRAFANA_URL: http://grafana:3000
       METRICS_PORT: 9323
-      ENV: ci
       PLAYWRIGHT_METRICS: true
 
     steps:
@@ -21,6 +25,7 @@ jobs:
 
     - name: Create Docker network
       run: docker network create monitoring-network
+      timeout-minutes: 2
 
     - name: Setup Prometheus
       run: |
@@ -39,6 +44,7 @@ jobs:
           -p 9090:9090 \
           -v ${{ github.workspace }}/prometheus:/etc/prometheus \
           prom/prometheus
+      timeout-minutes: 5
 
     - name: Setup Grafana
       run: |
@@ -50,21 +56,48 @@ jobs:
           -e "GF_AUTH_ANONYMOUS_ORG_ROLE=Admin" \
           -e "GF_AUTH_API_KEY=${{ secrets.GRAFANA_API_KEY }}" \
           grafana/grafana
+      timeout-minutes: 5
 
     - name: Configure Grafana Datasource and Dashboard
       run: |
         # Wait for Grafana to be ready
-        sleep 10
-        # Add Prometheus as datasource
-        curl -X POST http://localhost:3000/api/datasources \
-          -H "Content-Type: application/json" \
-          --data-binary '{
-            "name": "Prometheus",
-            "type": "prometheus",
-            "url": "http://prometheus:9090",
-            "access": "proxy",
-            "isDefault": true
-          }'
+        timeout=60
+        while ! curl -s http://localhost:3000/api/health | grep -q "ok"; do
+          if [ $timeout -le 0 ]; then
+            echo "Timeout waiting for Grafana"
+            exit 1
+          fi
+          echo "Waiting for Grafana to be ready... ($timeout seconds left)"
+          sleep 5
+          timeout=$((timeout - 5))
+        done
+
+        # Add Prometheus as datasource with retry
+        max_retries=3
+        retry_count=0
+        while [ $retry_count -lt $max_retries ]; do
+          if curl -X POST http://localhost:3000/api/datasources \
+            -H "Content-Type: application/json" \
+            --data-binary '{
+              "name": "Prometheus",
+              "type": "prometheus",
+              "url": "http://prometheus:9090",
+              "access": "proxy",
+              "isDefault": true
+            }'; then
+            echo "Datasource added successfully"
+            break
+          fi
+          retry_count=$((retry_count + 1))
+          if [ $retry_count -lt $max_retries ]; then
+            echo "Retrying in 5 seconds..."
+            sleep 5
+          else
+            echo "Failed to add datasource after $max_retries attempts"
+            exit 1
+          fi
+        done
+      timeout-minutes: 5
 
     - uses: actions/setup-node@v4
       with:
@@ -73,11 +106,13 @@ jobs:
     
     - name: Install dependencies
       run: npm ci
+      timeout-minutes: 5
       
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+      timeout-minutes: 10
       
-    - name: Run Playwright tests with metrics and upload dashboard
+    - name: Run Playwright tests with metrics and monitoring
       id: run-tests
       continue-on-error: true
       run: |
@@ -90,41 +125,43 @@ jobs:
           -e METRICS_PORT=9323 \
           -e GRAFANA_API_KEY=${{ secrets.GRAFANA_API_KEY }} \
           -e GRAFANA_URL=${{ env.GRAFANA_URL }} \
-          -e ENV=${{ env.ENV }} \
           -e PLAYWRIGHT_METRICS=${{ env.PLAYWRIGHT_METRICS }} \
           -p 9323:9323 \
           node:lts \
           tail -f /dev/null
 
-        # Run tests
+        # Run tests and post-test tasks with sharding
         docker exec test-runner npm install
         docker exec test-runner npx playwright install --with-deps
-        docker exec test-runner npm run all:headless
+        docker exec test-runner npx playwright test --shard=${{ matrix.shard }}/2
+        docker exec test-runner npm run post:test
+        docker exec test-runner npm run upload:dashboard
         
-        # Upload dashboard
-        docker exec \
-          -e GRAFANA_API_KEY=${{ secrets.GRAFANA_API_KEY }} \
-          -e GRAFANA_URL=${{ env.GRAFANA_URL }} \
-          test-runner \
-          npm run upload-dashboard
-
         # Stop the container
         docker stop test-runner
         docker rm test-runner
+      timeout-minutes: 30
       
     - name: Check Prometheus targets
       if: always()
       run: curl -s http://localhost:9090/api/v1/targets | jq .
+      timeout-minutes: 2
         
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-reports
+        name: test-reports-shard-${{ matrix.shard }}
         path: |
           my-report/
           playwright-report/
           test-results/
         retention-days: 1
+        if-no-files-found: warn
+
+    - name: Merge test results
+      if: always() && matrix.shard == 2
+      run: |
+        npx playwright merge-reports ./playwright-report
 
     - name: Check test results
       if: steps.run-tests.outcome == 'failure'

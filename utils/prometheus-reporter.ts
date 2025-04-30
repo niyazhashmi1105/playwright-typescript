@@ -22,25 +22,29 @@ export default class PrometheusReporter implements Reporter {
         this.isGitHubAction = process.env.GITHUB_ACTIONS === 'true';
         const registry = this.metricsServer.getRegistry();
 
-        this.testCounter = new Counter({
+        // Get existing metrics or create new ones
+        const existingTestCounter = registry.getSingleMetric('playwright_tests_total') as Counter<string>;
+        this.testCounter = existingTestCounter || new Counter({
             name: 'playwright_tests_total',
             help: 'Total number of tests run',
             labelNames: ['status', 'project', 'browser', 'suite'],
             registers: [registry]
         });
 
+        const existingActiveTestsGauge = registry.getSingleMetric('playwright_active_tests') as Gauge<string>;
+        this.activeTestsGauge = existingActiveTestsGauge || new Gauge({
+            name: 'playwright_active_tests',
+            help: 'Number of currently running tests',
+            labelNames: ['browser', 'project', 'suite'],
+            registers: [registry]
+        });
+
+        // Initialize other metrics that don't conflict
         this.testDurationHistogram = new Histogram({
             name: 'playwright_test_duration_seconds',
             help: 'Test execution time',
             labelNames: ['testName', 'browser', 'status', 'project', 'suite'],
             buckets: [0.1, 0.3, 0.5, 1, 2, 5, 10, 30],
-            registers: [registry]
-        });
-
-        this.activeTestsGauge = new Gauge({
-            name: 'playwright_active_tests',
-            help: 'Number of currently running tests',
-            labelNames: ['browser', 'project', 'suite'],
             registers: [registry]
         });
 
@@ -111,6 +115,17 @@ export default class PrometheusReporter implements Reporter {
         const project = test.parent.project()?.name || 'unknown';
         const suite = test.parent.title || 'unknown';
         
+        // Track initial memory usage
+        const memoryUsage = process.memoryUsage();
+        this.memoryGauge.set(
+            {
+                browser,
+                project,
+                testName: test.title
+            },
+            memoryUsage.heapUsed
+        );
+
         this.activeTestsGauge.inc({
             browser,
             project,
@@ -159,16 +174,27 @@ export default class PrometheusReporter implements Reporter {
             });
         }
 
+        // Track final memory usage
+        const memoryUsage = process.memoryUsage();
+        this.memoryGauge.set(
+            {
+                browser,
+                project,
+                testName: test.title
+            },
+            memoryUsage.heapUsed
+        );
+
         // Record memory usage if available
-        const memoryUsage = (result as any).metadata?.memoryUsage;
-        if (memoryUsage) {
+        const resultMemoryUsage = (result as any).metadata?.memoryUsage;
+        if (resultMemoryUsage) {
             this.memoryGauge.set(
                 {
                     browser,
                     project,
                     testName: test.title
                 },
-                memoryUsage
+                resultMemoryUsage
             );
         }
 

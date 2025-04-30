@@ -1,6 +1,6 @@
 import express from 'express';
 import { Server } from 'http';
-import { register, Registry, collectDefaultMetrics } from 'prom-client';
+import { register, Registry, collectDefaultMetrics, Counter, Gauge } from 'prom-client';
 import net from 'net';
 
 export class MetricsServer {
@@ -13,6 +13,8 @@ export class MetricsServer {
     private isShuttingDown: boolean = false;
     private keepAliveTimer: NodeJS.Timeout | null = null;
     private static readonly KEEP_ALIVE_DURATION = 300000; // 5 minutes in milliseconds
+    private testCounter: Counter;
+    private activeTestsGauge: Gauge;
 
     private constructor(private port: number) {
         this.app = express();
@@ -24,6 +26,9 @@ export class MetricsServer {
 
         console.log('Initializing metrics server...');
         
+        // Initialize test metrics
+        this.initializeMetrics();
+
         // Add default system metrics with a prefix to avoid conflicts
         collectDefaultMetrics({ 
             register: this.registry,
@@ -114,9 +119,46 @@ export class MetricsServer {
             });
         });
 
+        // Reset metrics endpoint
+        this.app.post('/reset-metrics', async (req, res) => {
+            try {
+                await this.resetMetrics();
+                res.status(200).json({ message: 'Metrics reset successfully' });
+            } catch (error) {
+                console.error('[Metrics Reset Error]:', error);
+                res.status(500).json({ error: 'Failed to reset metrics' });
+            }
+        });
+
         // Handle graceful shutdown
         process.on('SIGTERM', () => this.handleShutdown());
         process.on('SIGINT', () => this.handleShutdown());
+    }
+
+    private initializeMetrics() {
+        // Check if metrics already exist before creating new ones
+        if (!this.registry.getSingleMetric('playwright_tests_total')) {
+            this.testCounter = new Counter({
+                name: 'playwright_tests_total',
+                help: 'Total number of tests run',
+                labelNames: ['status', 'project', 'browser', 'suite'],
+                registers: [this.registry]
+            });
+        }
+
+        if (!this.registry.getSingleMetric('playwright_active_tests')) {
+            this.activeTestsGauge = new Gauge({
+                name: 'playwright_active_tests',
+                help: 'Number of currently running tests',
+                labelNames: ['browser', 'project', 'suite'],
+                registers: [this.registry]
+            });
+        }
+    }
+
+    private async resetMetrics() {
+        await this.registry.resetMetrics();
+        this.initializeMetrics();
     }
 
     private resetKeepAliveTimer() {

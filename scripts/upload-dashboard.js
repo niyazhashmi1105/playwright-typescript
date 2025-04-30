@@ -14,45 +14,58 @@ if (!GRAFANA_API_KEY) {
 
 async function uploadDashboard() {
     const dashboardPath = path.join(__dirname, '..', 'grafana', 'dashboard.json');
-    const dashboardJson = JSON.parse(fs.readFileSync(dashboardPath, 'utf8'));
     
-    // Prepare dashboard payload
-    const payload = {
-        dashboard: dashboardJson,
-        overwrite: true,
-        message: 'Dashboard updated via API'
-    };
+    // Check if dashboard file exists
+    if (!fs.existsSync(dashboardPath)) {
+        throw new Error(`Dashboard file not found at ${dashboardPath}`);
+    }
 
-    const options = {
-        hostname: new URL(GRAFANA_URL).hostname,
-        port: new URL(GRAFANA_URL).port || (GRAFANA_URL.startsWith('https') ? 443 : 80),
-        path: '/api/dashboards/db',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${GRAFANA_API_KEY}`
-        }
-    };
-
-    return new Promise((resolve, reject) => {
-        const reqLib = GRAFANA_URL.startsWith('https') ? https : http;
-        const req = reqLib.request(options, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                if (res.statusCode >= 200 && res.statusCode < 300) {
-                    console.log('Dashboard uploaded successfully!');
-                    resolve(JSON.parse(data));
-                } else {
-                    reject(new Error(`Failed to upload dashboard: ${res.statusCode} ${data}`));
-                }
-            });
-        });
+    try {
+        const dashboardJson = JSON.parse(fs.readFileSync(dashboardPath, 'utf8'));
         
-        req.on('error', reject);
-        req.write(JSON.stringify(payload));
-        req.end();
-    });
+        // Prepare dashboard payload
+        const payload = {
+            dashboard: dashboardJson,
+            overwrite: true,
+            message: 'Dashboard updated via API'
+        };
+
+        const options = {
+            hostname: new URL(GRAFANA_URL).hostname,
+            port: new URL(GRAFANA_URL).port || (GRAFANA_URL.startsWith('https') ? 443 : 80),
+            path: '/api/dashboards/db',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${GRAFANA_API_KEY}`
+            }
+        };
+
+        return new Promise((resolve, reject) => {
+            const reqLib = GRAFANA_URL.startsWith('https') ? https : http;
+            const req = reqLib.request(options, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
+                        console.log('Dashboard uploaded successfully!');
+                        resolve(JSON.parse(data));
+                    } else {
+                        reject(new Error(`Failed to upload dashboard: ${res.statusCode} ${data}`));
+                    }
+                });
+            });
+            
+            req.on('error', reject);
+            req.write(JSON.stringify(payload));
+            req.end();
+        });
+    } catch (error) {
+        if (error instanceof SyntaxError) {
+            throw new Error(`Invalid JSON in dashboard file: ${error.message}`);
+        }
+        throw error;
+    }
 }
 
 // Export the function

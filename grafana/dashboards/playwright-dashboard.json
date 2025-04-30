@@ -411,7 +411,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(playwright_tests_total{status=~\"passed|failed\"}) by (status)",
+          "expr": "max(playwright_tests_total{status=~\"passed|failed\"}) by (status)",
+          "instant": true,
           "legendFormat": "{{status}}",
           "refId": "A"
         }
