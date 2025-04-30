@@ -20,75 +20,17 @@ export default class PrometheusReporter implements Reporter {
         const port = 9323;
         this.metricsServer = MetricsServer.getInstance(port);
         this.isGitHubAction = process.env.GITHUB_ACTIONS === 'true';
-        const registry = this.metricsServer.getRegistry();
 
-        // Get existing metrics or create new ones
-        const existingTestCounter = registry.getSingleMetric('playwright_tests_total') as Counter<string>;
-        this.testCounter = existingTestCounter || new Counter({
-            name: 'playwright_tests_total',
-            help: 'Total number of tests run',
-            labelNames: ['status', 'project', 'browser', 'suite'],
-            registers: [registry]
-        });
-
-        const existingActiveTestsGauge = registry.getSingleMetric('playwright_active_tests') as Gauge<string>;
-        this.activeTestsGauge = existingActiveTestsGauge || new Gauge({
-            name: 'playwright_active_tests',
-            help: 'Number of currently running tests',
-            labelNames: ['browser', 'project', 'suite'],
-            registers: [registry]
-        });
-
-        // Initialize other metrics that don't conflict
-        this.testDurationHistogram = new Histogram({
-            name: 'playwright_test_duration_seconds',
-            help: 'Test execution time',
-            labelNames: ['testName', 'browser', 'status', 'project', 'suite'],
-            buckets: [0.1, 0.3, 0.5, 1, 2, 5, 10, 30],
-            registers: [registry]
-        });
-
-        this.testStepCounter = new Counter({
-            name: 'playwright_test_steps_total',
-            help: 'Total number of test steps',
-            labelNames: ['status', 'testName', 'stepName'],
-            registers: [registry]
-        });
-
-        this.retryCounter = new Counter({
-            name: 'playwright_test_retries_total',
-            help: 'Total number of test retries',
-            labelNames: ['testName', 'browser', 'project'],
-            registers: [registry]
-        });
-
-        this.testSuiteGauge = new Gauge({
-            name: 'playwright_test_suite_info',
-            help: 'Information about the test suite execution',
-            labelNames: ['project', 'browser', 'status'],
-            registers: [registry]
-        });
-
-        this.browserMetricsGauge = new Gauge({
-            name: 'playwright_browser_metrics',
-            help: 'Browser-specific metrics during test execution',
-            labelNames: ['metric', 'browser', 'project'],
-            registers: [registry]
-        });
-
-        this.errorCounter = new Counter({
-            name: 'playwright_test_errors_total',
-            help: 'Total number of test errors by type',
-            labelNames: ['errorType', 'browser', 'project', 'testName'],
-            registers: [registry]
-        });
-
-        this.memoryGauge = new Gauge({
-            name: 'playwright_memory_usage_bytes',
-            help: 'Memory usage during test execution',
-            labelNames: ['browser', 'project', 'testName'],
-            registers: [registry]
-        });
+        // Get metrics from MetricsServer instance
+        this.testCounter = this.metricsServer.getTestCounter();
+        this.testDurationHistogram = this.metricsServer.getTestDurationHistogram();
+        this.activeTestsGauge = this.metricsServer.getActiveTestsGauge();
+        this.testStepCounter = this.metricsServer.getTestStepCounter();
+        this.retryCounter = this.metricsServer.getRetryCounter();
+        this.testSuiteGauge = this.metricsServer.getTestSuiteGauge();
+        this.browserMetricsGauge = this.metricsServer.getBrowserMetricsGauge();
+        this.errorCounter = this.metricsServer.getErrorCounter();
+        this.memoryGauge = this.metricsServer.getMemoryGauge();
     }
 
     async onBegin(config: FullConfig): Promise<void> {
@@ -96,17 +38,20 @@ export default class PrometheusReporter implements Reporter {
         try {
             await this.metricsServer.start();
             
+            // Reset all metrics at the start of a test run
+            const registry = this.metricsServer.getRegistry();
+            await registry.resetMetrics();
+            
             config.projects.forEach(project => {
                 console.log(`Setting gauge for project ${project.name}`);
                 this.testSuiteGauge.set({ 
                     project: project.name,
                     browser: project.use?.browserName || 'unknown',
                     status: 'running'
-                }, 1);
+                }, 0); // Initialize with 0
             });
         } catch (error) {
             console.error('Failed to start metrics server:', error);
-            // Don't throw the error to allow tests to continue without metrics
         }
     }
 

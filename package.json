@@ -21,7 +21,7 @@
   "devDependencies": {
     "@playwright/test": "^1.51.1",
     "@types/express": "^5.0.1",
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.15.3",
     "allure-playwright": "^3.2.1",
     "browserstack-node-sdk": "^1.34.49",
     "dotenv": "^16.4.7",

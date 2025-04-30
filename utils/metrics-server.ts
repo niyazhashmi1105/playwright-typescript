@@ -1,7 +1,8 @@
-import express from 'express';
+import * as express from 'express';
 import { Server } from 'http';
-import { register, Registry, collectDefaultMetrics, Counter, Gauge } from 'prom-client';
-import net from 'net';
+import { register, Registry, collectDefaultMetrics, Counter, Gauge, Histogram } from 'prom-client';
+import * as net from 'net';
+import * as os from 'os';
 
 export class MetricsServer {
     private static instance: MetricsServer | null = null;
@@ -13,20 +14,65 @@ export class MetricsServer {
     private isShuttingDown: boolean = false;
     private keepAliveTimer: NodeJS.Timeout | null = null;
     private static readonly KEEP_ALIVE_DURATION = 300000; // 5 minutes in milliseconds
-    private testCounter: Counter;
-    private activeTestsGauge: Gauge;
+    private static readonly MAX_PORT_ATTEMPTS = 10; // Maximum number of port attempts
+
+    // Initialize metrics with dummy values that will be overwritten in initializeMetrics
+    private testCounter: Counter<string> = new Counter({
+        name: 'playwright_tests_total',
+        help: 'Total number of tests run',
+        labelNames: ['status', 'project', 'browser', 'suite']
+    });
+    private activeTestsGauge: Gauge<string> = new Gauge({
+        name: 'playwright_active_tests',
+        help: 'Number of currently running tests',
+        labelNames: ['browser', 'project', 'suite']
+    });
+    private testDurationHistogram: Histogram<string> = new Histogram({
+        name: 'playwright_test_duration_seconds',
+        help: 'Test execution time',
+        labelNames: ['testName', 'browser', 'status', 'project', 'suite'],
+        buckets: [0.1, 0.3, 0.5, 1, 2, 5, 10, 30]
+    });
+    private testStepCounter: Counter<string> = new Counter({
+        name: 'playwright_test_steps_total',
+        help: 'Total number of test steps',
+        labelNames: ['status', 'testName', 'stepName']
+    });
+    private retryCounter: Counter<string> = new Counter({
+        name: 'playwright_test_retries_total',
+        help: 'Total number of test retries',
+        labelNames: ['testName', 'browser', 'project']
+    });
+    private testSuiteGauge: Gauge<string> = new Gauge({
+        name: 'playwright_test_suite_info',
+        help: 'Information about the test suite execution',
+        labelNames: ['project', 'browser', 'status']
+    });
+    private browserMetricsGauge: Gauge<string> = new Gauge({
+        name: 'playwright_browser_metrics',
+        help: 'Browser-specific metrics during test execution',
+        labelNames: ['metric', 'browser', 'project']
+    });
+    private errorCounter: Counter<string> = new Counter({
+        name: 'playwright_test_errors_total',
+        help: 'Total number of test errors by type',
+        labelNames: ['errorType', 'browser', 'project', 'testName']
+    });
+    private memoryGauge: Gauge<string> = new Gauge({
+        name: 'playwright_memory_usage_bytes',
+        help: 'Memory usage during test execution',
+        labelNames: ['browser', 'project', 'testName']
+    });
 
     private constructor(private port: number) {
-        this.app = express();
+        this.app = express.default();  // Fix express() call
         this.server = null;
         this.registry = new Registry();
         this.metricsInterval = null;
         this.keepAliveTimer = null;
         this.currentPort = port;
 
-        console.log('Initializing metrics server...');
-        
-        // Initialize test metrics
+        // Initialize all metrics
         this.initializeMetrics();
 
         // Add default system metrics with a prefix to avoid conflicts
@@ -136,7 +182,7 @@ export class MetricsServer {
     }
 
     private initializeMetrics() {
-        // Check if metrics already exist before creating new ones
+        // Initialize all metrics only if they don't exist
         if (!this.registry.getSingleMetric('playwright_tests_total')) {
             this.testCounter = new Counter({
                 name: 'playwright_tests_total',
@@ -154,11 +200,89 @@ export class MetricsServer {
                 registers: [this.registry]
             });
         }
+
+        if (!this.registry.getSingleMetric('playwright_test_duration_seconds')) {
+            this.testDurationHistogram = new Histogram({
+                name: 'playwright_test_duration_seconds',
+                help: 'Test execution time',
+                labelNames: ['testName', 'browser', 'status', 'project', 'suite'],
+                buckets: [0.1, 0.3, 0.5, 1, 2, 5, 10, 30],
+                registers: [this.registry]
+            });
+        }
+
+        if (!this.registry.getSingleMetric('playwright_test_steps_total')) {
+            this.testStepCounter = new Counter({
+                name: 'playwright_test_steps_total',
+                help: 'Total number of test steps',
+                labelNames: ['status', 'testName', 'stepName'],
+                registers: [this.registry]
+            });
+        }
+
+        if (!this.registry.getSingleMetric('playwright_test_retries_total')) {
+            this.retryCounter = new Counter({
+                name: 'playwright_test_retries_total',
+                help: 'Total number of test retries',
+                labelNames: ['testName', 'browser', 'project'],
+                registers: [this.registry]
+            });
+        }
+
+        if (!this.registry.getSingleMetric('playwright_test_suite_info')) {
+            this.testSuiteGauge = new Gauge({
+                name: 'playwright_test_suite_info',
+                help: 'Information about the test suite execution',
+                labelNames: ['project', 'browser', 'status'],
+                registers: [this.registry]
+            });
+        }
+
+        if (!this.registry.getSingleMetric('playwright_browser_metrics')) {
+            this.browserMetricsGauge = new Gauge({
+                name: 'playwright_browser_metrics',
+                help: 'Browser-specific metrics during test execution',
+                labelNames: ['metric', 'browser', 'project'],
+                registers: [this.registry]
+            });
+        }
+
+        if (!this.registry.getSingleMetric('playwright_test_errors_total')) {
+            this.errorCounter = new Counter({
+                name: 'playwright_test_errors_total',
+                help: 'Total number of test errors by type',
+                labelNames: ['errorType', 'browser', 'project', 'testName'],
+                registers: [this.registry]
+            });
+        }
+
+        if (!this.registry.getSingleMetric('playwright_memory_usage_bytes')) {
+            this.memoryGauge = new Gauge({
+                name: 'playwright_memory_usage_bytes',
+                help: 'Memory usage during test execution',
+                labelNames: ['browser', 'project', 'testName'],
+                registers: [this.registry]
+            });
+        }
     }
 
     private async resetMetrics() {
-        await this.registry.resetMetrics();
-        this.initializeMetrics();
+        try {
+            // Clear all existing metrics
+            await this.registry.resetMetrics();
+            
+            // Re-initialize the metrics with zero values
+            this.testCounter.reset();
+            this.activeTestsGauge.reset();
+
+            // Reinitialize the metrics system
+            this.initializeMetrics();
+            
+            console.log('Successfully reset all metrics');
+        } catch (error) {
+            console.error('Error resetting metrics:', error);
+            throw error;
+        }
     }
 
     private resetKeepAliveTimer() {
@@ -172,6 +296,33 @@ export class MetricsServer {
         }, MetricsServer.KEEP_ALIVE_DURATION);
     }
 
+    private async findAvailablePort(startPort: number): Promise<number> {
+        for (let port = startPort; port < startPort + MetricsServer.MAX_PORT_ATTEMPTS; port++) {
+            try {
+                await new Promise((resolve, reject) => {
+                    const server = net.createServer()
+                        .listen(port)
+                        .once('listening', () => {
+                            server.close();
+                            resolve(port);
+                        })
+                        .once('error', (err: NodeJS.ErrnoException) => {
+                            if (err.code === 'EADDRINUSE') {
+                                resolve(null);
+                            } else {
+                                reject(err);
+                            }
+                        });
+                });
+                return port;
+            } catch (err) {
+                console.log(`Port ${port} check failed:`, err);
+                continue;
+            }
+        }
+        throw new Error(`No available ports found after ${MetricsServer.MAX_PORT_ATTEMPTS} attempts`);
+    }
+
     static getInstance(port: number): MetricsServer {
         if (!MetricsServer.instance) {
             MetricsServer.instance = new MetricsServer(port);
@@ -183,6 +334,42 @@ export class MetricsServer {
         return this.registry;
     }
 
+    getTestCounter(): Counter<string> {
+        return this.testCounter;
+    }
+
+    getActiveTestsGauge(): Gauge<string> {
+        return this.activeTestsGauge;
+    }
+
+    getTestDurationHistogram(): Histogram<string> {
+        return this.testDurationHistogram;
+    }
+
+    getTestStepCounter(): Counter<string> {
+        return this.testStepCounter;
+    }
+
+    getRetryCounter(): Counter<string> {
+        return this.retryCounter;
+    }
+
+    getTestSuiteGauge(): Gauge<string> {
+        return this.testSuiteGauge;
+    }
+
+    getBrowserMetricsGauge(): Gauge<string> {
+        return this.browserMetricsGauge;
+    }
+
+    getErrorCounter(): Counter<string> {
+        return this.errorCounter;
+    }
+
+    getMemoryGauge(): Gauge<string> {
+        return this.memoryGauge;
+    }
+
     async start(): Promise<void> {
         if (this.server) {
             console.log('Metrics server already running');
@@ -190,8 +377,11 @@ export class MetricsServer {
         }
 
         try {
+            // Try to find an available port starting from the desired port
+            this.currentPort = await this.findAvailablePort(this.port);
+            console.log(`Using port ${this.currentPort} for metrics server`);
+
             return new Promise((resolve, reject) => {
-                // Listen on all interfaces to ensure Docker container access
                 this.server = this.app.listen(this.currentPort, '0.0.0.0', () => {
                     const addresses = this.getServerAddresses();
                     console.log(`Metrics server listening on port ${this.currentPort}`);
@@ -216,9 +406,7 @@ export class MetricsServer {
                     
                     resolve();
                 }).on('error', (error: NodeJS.ErrnoException) => {
-                    if (error.code === 'EADDRINUSE') {
-                        console.error(`Port ${this.currentPort} is already in use. Please ensure no other process is using this port.`);
-                    }
+                    console.error(`Failed to start server on port ${this.currentPort}:`, error);
                     reject(error);
                 });
 
@@ -235,14 +423,16 @@ export class MetricsServer {
 
     private getServerAddresses(): string[] {
         const addresses: string[] = [];
-        const networkInterfaces = require('os').networkInterfaces();
+        const networkInterfaces = os.networkInterfaces();
         
         for (const interfaceName in networkInterfaces) {
             const interfaces = networkInterfaces[interfaceName];
-            for (const iface of interfaces) {
-                // Include both internal and external IPv4 addresses for debugging
-                if (iface.family === 'IPv4') {
-                    addresses.push(`${iface.address}:${this.currentPort}`);
+            if (interfaces) {  // Add null check for interfaces
+                for (const iface of interfaces) {
+                    // Include both internal and external IPv4 addresses for debugging
+                    if (iface.family === 'IPv4') {
+                        addresses.push(`${iface.address}:${this.currentPort}`);
+                    }
                 }
             }
         }
