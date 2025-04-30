@@ -94,60 +94,180 @@ class EmailUtils {
         const hasFailures = metrics.failed > 0;
         
         return `
-            <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: ${hasFailures ? '#dc2626' : '#16a34a'};">
-                    Playwright Test Execution Report ${hasFailures ? '❌' : '✅'}
-                </h2>
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Test Report</title>
+                <style>
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        margin: 0;
+                        padding: 0;
+                        background-color: #f5f5f5;
+                        font-size: 16px;
+                    }
+                    .container {
+                        max-width: 800px;
+                        margin: 20px auto;
+                        background-color: #fff;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        padding: 24px;
+                    }
+                    h2 {
+                        font-size: 24px;
+                        font-weight: 600;
+                        color: ${hasFailures ? '#dc2626' : '#16a34a'};
+                        margin: 0 0 24px;
+                        padding-bottom: 12px;
+                        border-bottom: 2px solid ${hasFailures ? '#fee2e2' : '#dcfce7'};
+                        letter-spacing: -0.01em;
+                    }
+                    h3 {
+                        font-size: 20px;
+                        font-weight: 600;
+                        margin: 0 0 16px;
+                        color: #1a1a1a;
+                    }
+                    h4 {
+                        font-size: 16px;
+                        font-weight: 600;
+                        margin: 16px 0 8px;
+                        color: #1a1a1a;
+                    }
+                    .section {
+                        background-color: #f8fafc;
+                        padding: 20px;
+                        border-radius: 6px;
+                        margin: 20px 0;
+                        border: 1px solid #e2e8f0;
+                    }
+                    .error-section {
+                        background-color: #fef2f2;
+                        border: 1px solid #fee2e2;
+                    }
+                    .warning-section {
+                        background-color: #fef3c7;
+                        border: 1px solid #fde68a;
+                    }
+                    ul {
+                        list-style-type: none;
+                        padding: 0;
+                        margin: 0;
+                    }
+                    li {
+                        margin-bottom: 8px;
+                        font-size: 15px;
+                    }
+                    .browser-stats {
+                        padding: 12px;
+                        border-radius: 4px;
+                        background: #fff;
+                        margin: 8px 0;
+                        border: 1px solid #e5e7eb;
+                    }
+                    .stat-value {
+                        font-weight: 500;
+                        color: #1a1a1a;
+                    }
+                    .error-message {
+                        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                        font-size: 14px;
+                        padding: 8px;
+                        background: rgba(0,0,0,0.05);
+                        border-radius: 4px;
+                        margin-top: 4px;
+                        color: #dc2626;
+                    }
+                    .status-message {
+                        font-size: 16px;
+                        font-weight: 600;
+                        padding: 12px 16px;
+                        border-radius: 6px;
+                        margin-top: 20px;
+                        background-color: ${hasFailures ? '#fee2e2' : '#dcfce7'};
+                        color: ${hasFailures ? '#dc2626' : '#16a34a'};
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h2>Playwright Test Execution Report ${hasFailures ? '❌' : '✅'}</h2>
 
-                <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <h3 style="margin-top: 0;">Summary</h3>
-                    <ul style="list-style-type: none; padding: 0;">
-                        <li><strong>Total Tests:</strong> ${metrics.total}</li>
-                        <li style="color: #16a34a;"><strong>Passed:</strong> ${metrics.passed}</li>
-                        ${metrics.failed > 0 ? 
-                            `<li style="color: #dc2626;"><strong>Failed:</strong> ${metrics.failed}</li>` : 
-                            ''}
-                        <li><strong>Pass Rate:</strong> ${passRate}%</li>
-                        <li><strong>Duration:</strong> ${metrics.duration.toFixed(2)} seconds</li>
-                    </ul>
-                </div>
-
-                <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <h3 style="margin-top: 0;">Browser Breakdown</h3>
-                    ${metrics.browserBreakdown.map(browser => `
-                        <div style="margin-bottom: 10px;">
-                            <h4 style="margin: 5px 0;">Browser: ${browser.browser}</h4>
-                            <ul style="margin: 5px 0;">
-                                <li>Total: ${browser.total}</li>
-                                <li style="color: green;">Passed: ${browser.passed}</li>
-                                ${browser.failed > 0 ? 
-                                    `<li style="color: red;">Failed: ${browser.failed}</li>` : 
-                                    ''}
-                            </ul>
-                        </div>
-                    `).join('')}
-                </div>
-
-                ${metrics.failedTests && metrics.failedTests.length > 0 ? `
-                    <div style="background-color: #fef2f2; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                        <h3 style="color: #dc2626; margin-top: 0;">Failed Tests Details</h3>
-                        <ul style="margin: 0;">
-                            ${metrics.failedTests.map(test => `
-                                <li style="margin-bottom: 10px;">
-                                    <strong>${test.name}</strong> (${test.browser})
-                                    <br>
-                                    <span style="color: #666; font-size: 0.9em;">Error: ${test.error}</span>
-                                </li>
-                            `).join('')}
+                    <div class="section">
+                        <h3>Summary</h3>
+                        <ul>
+                            <li><span class="stat-value">Total Tests:</span> ${metrics.total}</li>
+                            <li style="color: #16a34a;"><span class="stat-value">Passed:</span> ${metrics.passed}</li>
+                            ${metrics.failed > 0 ? 
+                                `<li style="color: #dc2626;"><span class="stat-value">Failed:</span> ${metrics.failed}</li>` : 
+                                ''}
+                            ${metrics.skipped > 0 ? 
+                                `<li style="color: #eab308;"><span class="stat-value">Skipped:</span> ${metrics.skipped}</li>` : 
+                                ''}
+                            <li><span class="stat-value">Pass Rate:</span> ${passRate}%</li>
+                            <li><span class="stat-value">Duration:</span> ${metrics.duration.toFixed(2)} seconds</li>
                         </ul>
                     </div>
-                ` : ''}
 
-                ${hasFailures ? 
-                    '<p style="color: #dc2626; font-weight: bold;">⚠️ Action Required: Please investigate the failed tests.</p>' : 
-                    '<p style="color: #16a34a; font-weight: bold;">✅ All tests passed successfully!</p>'
-                }
-            </div>
+                    <div class="section">
+                        <h3>Browser Breakdown</h3>
+                        ${metrics.browserBreakdown.map(browser => `
+                            <div class="browser-stats">
+                                <h4>Browser: ${browser.browser}</h4>
+                                <ul>
+                                    <li><span class="stat-value">Total:</span> ${browser.total}</li>
+                                    <li style="color: #16a34a;"><span class="stat-value">Passed:</span> ${browser.passed}</li>
+                                    ${browser.failed > 0 ? 
+                                        `<li style="color: #dc2626;"><span class="stat-value">Failed:</span> ${browser.failed}</li>` : 
+                                        ''}
+                                    ${browser.skipped > 0 ? 
+                                        `<li style="color: #eab308;"><span class="stat-value">Skipped:</span> ${browser.skipped}</li>` : 
+                                        ''}
+                                </ul>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    ${metrics.failedTests && metrics.failedTests.length > 0 ? `
+                        <div class="section error-section">
+                            <h3 style="color: #dc2626;">Failed Tests Details</h3>
+                            <ul>
+                                ${metrics.failedTests.map(test => `
+                                    <li>
+                                        <strong>${test.name}</strong> (${test.browser})
+                                        <div class="error-message">${test.error}</div>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    ${metrics.skippedTests && metrics.skippedTests.length > 0 ? `
+                        <div class="section warning-section">
+                            <h3 style="color: #92400e;">Skipped Tests Details</h3>
+                            <ul>
+                                ${metrics.skippedTests.map(test => `
+                                    <li>
+                                        <strong>${test.name}</strong> (${test.browser})
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    <div class="status-message">
+                        ${hasFailures ? 
+                            '⚠️ Action Required: Please investigate the failed tests.' : 
+                            '✅ All tests passed successfully!'
+                        }
+                    </div>
+                </div>
+            </body>
+            </html>
         `;
     }
 }

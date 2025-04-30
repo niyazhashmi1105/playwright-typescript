@@ -1,9 +1,10 @@
 global:
   resolve_timeout: 5m
-  smtp_smarthost: '${SMTP_HOST}:${SMTP_PORT}'
-  smtp_from: '${SMTP_FROM}'
-  smtp_auth_username: '${SMTP_USER}'
-  smtp_auth_password: '${ALERTMANAGER_EMAIL_PASSWORD}'
+  smtp_from: 'hashmimdniyaz@gmail.com'
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_auth_username: 'hashmimdniyaz@gmail.com'
+  smtp_auth_password: 'mtqobzrwneayturw'
+  smtp_auth_identity: 'hashmimdniyaz@gmail.com'
   smtp_require_tls: true
 
 templates:
@@ -19,8 +20,7 @@ route:
 receivers:
 - name: 'email'
   email_configs:
-  - to: '${SMTP_TO}'
-    send_resolved: true
+  - to: 'hashmimdniyaz@gmail.com'
     headers:
       subject: '{{ template "email.subject" . }}'
     html: '{{ template "email.html" . }}'

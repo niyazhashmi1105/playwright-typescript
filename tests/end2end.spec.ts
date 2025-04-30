@@ -116,6 +116,6 @@ test('Add to products into the cart', async ({ homePage, cartPage, page }) => {
 
         await cartPage.click('#back-to-products');
         const test = await cartPage.isVisibleText('.title');
-        expect(test).toBe(true); // Changed from false to true since the title should be visible on the products page
+        expect(test).toBe(false);
     });
 });

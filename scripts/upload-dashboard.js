@@ -4,7 +4,7 @@ const path = require('path');
 const https = require('https');
 const http = require('http');
 
-const GRAFANA_URL = process.env.GRAFANA_URL || 'http://localhost:3000';
+const GRAFANA_URL = process.env.GRAFANA_URL || 'http://localhost:3002';
 const GRAFANA_API_KEY = process.env.GRAFANA_API_KEY;
 
 if (!GRAFANA_API_KEY) {

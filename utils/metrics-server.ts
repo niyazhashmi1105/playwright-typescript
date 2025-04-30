@@ -1,75 +1,262 @@
 import express from 'express';
-import { Registry, collectDefaultMetrics } from 'prom-client';
+import { Server } from 'http';
+import { register, Registry, collectDefaultMetrics } from 'prom-client';
+import net from 'net';
 
 export class MetricsServer {
-    private app = express();
+    private static instance: MetricsServer | null = null;
+    private app: express.Application;
+    private server: Server | null;
     private registry: Registry;
-    private port: number;
-    private server: any;
+    private metricsInterval: NodeJS.Timeout | null;
+    private currentPort: number;
+    private isShuttingDown: boolean = false;
+    private keepAliveTimer: NodeJS.Timeout | null = null;
+    private static readonly KEEP_ALIVE_DURATION = 300000; // 5 minutes in milliseconds
 
-    constructor(port: number = 9323) {
-        this.port = port;
+    private constructor(private port: number) {
+        this.app = express();
+        this.server = null;
         this.registry = new Registry();
-        collectDefaultMetrics({ register: this.registry });
+        this.metricsInterval = null;
+        this.keepAliveTimer = null;
+        this.currentPort = port;
 
-        // Add endpoint for metrics
-        this.app.get('/metrics', async (req: express.Request, res: express.Response): Promise<void> => {
-            res.setHeader('Content-Type', this.registry.contentType);
-            const metrics: string = await this.registry.metrics();
-            res.send(metrics);
+        console.log('Initializing metrics server...');
+        
+        // Add default system metrics with a prefix to avoid conflicts
+        collectDefaultMetrics({ 
+            register: this.registry,
+            prefix: 'playwright_',
+            gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5] 
         });
 
-        // Add a health check endpoint
-        this.app.get('/health', (req: express.Request, res: express.Response) => {
-            res.status(200).send('OK');
+        // Enable CORS for all routes
+        this.app.use((req, res, next) => {
+            res.header('Access-Control-Allow-Origin', '*');
+            res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+            res.header('Access-Control-Allow-Headers', 'Content-Type');
+            
+            // Handle preflight requests
+            if (req.method === 'OPTIONS') {
+                res.sendStatus(200);
+                return;
+            }
+            next();
         });
+
+        // Basic middleware for logging and error handling
+        this.app.use((req, res, next) => {
+            console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} from ${req.ip}`);
+            next();
+        });
+
+        // Configure routes
+        this.app.get('/metrics', async (req, res) => {
+            try {
+                const metrics = await this.registry.metrics();
+                console.log(`[${new Date().toISOString()}] Metrics generated (${metrics.length} bytes)`);
+                res.set('Content-Type', this.registry.contentType);
+                res.send(metrics);
+                
+                // Reset keep-alive timer on each metrics request
+                this.resetKeepAliveTimer();
+            } catch (error) {
+                console.error('[Metrics Error]:', error);
+                res.status(500).json({ error: 'Failed to generate metrics' });
+            }
+        });
+
+        // Add debug endpoint
+        this.app.get('/debug', async (req, res) => {
+            try {
+                const metrics = await this.registry.getMetricsAsJSON();
+                res.json({
+                    requestInfo: {
+                        ip: req.ip,
+                        ips: req.ips,
+                        protocol: req.protocol,
+                        hostname: req.hostname,
+                        path: req.path
+                    },
+                    serverInfo: {
+                        port: this.currentPort,
+                        addresses: this.getServerAddresses(),
+                        keepAliveRemaining: this.keepAliveTimer ? 'active' : 'inactive'
+                    },
+                    metricsCount: metrics.length,
+                    metrics: metrics.map(m => ({
+                        name: m.name,
+                        help: m.help,
+                        type: m.type
+                    }))
+                });
+            } catch (error) {
+                console.error('[Debug Endpoint Error]:', error);
+                res.status(500).json({ error: 'Failed to get metrics' });
+            }
+        });
+
+        // Add health check endpoint
+        this.app.get('/health', (req, res) => {
+            res.status(200).json({
+                status: 'healthy',
+                timestamp: new Date().toISOString(),
+                port: this.currentPort,
+                metricsEnabled: true,
+                addresses: this.getServerAddresses(),
+                keepAliveRemaining: this.keepAliveTimer ? 'active' : 'inactive',
+                requestInfo: {
+                    ip: req.ip,
+                    protocol: req.protocol,
+                    hostname: req.hostname
+                }
+            });
+        });
+
+        // Handle graceful shutdown
+        process.on('SIGTERM', () => this.handleShutdown());
+        process.on('SIGINT', () => this.handleShutdown());
     }
 
-    public getRegistry(): Registry {
+    private resetKeepAliveTimer() {
+        if (this.keepAliveTimer) {
+            clearTimeout(this.keepAliveTimer);
+        }
+        
+        this.keepAliveTimer = setTimeout(() => {
+            console.log('Keep-alive timer expired, shutting down metrics server...');
+            this.handleShutdown();
+        }, MetricsServer.KEEP_ALIVE_DURATION);
+    }
+
+    static getInstance(port: number): MetricsServer {
+        if (!MetricsServer.instance) {
+            MetricsServer.instance = new MetricsServer(port);
+        }
+        return MetricsServer.instance;
+    }
+
+    getRegistry(): Registry {
         return this.registry;
     }
 
-    public start(): void {
-        const tryPort = (port: number): Promise<number> => {
-            return new Promise((resolve, reject) => {
-                const server = this.app.listen(port, '0.0.0.0')
-                    .once('listening', () => {
-                        this.server = server;
-                        resolve(port);
-                    })
-                    .once('error', (err: any) => {
-                        if (err.code === 'EADDRINUSE') {
-                            // Try next port
-                            resolve(tryPort(port + 1));
-                        } else {
-                            reject(err);
-                        }
-                    });
-            });
-        };
+    async start(): Promise<void> {
+        if (this.server) {
+            console.log('Metrics server already running');
+            return;
+        }
 
-        tryPort(this.port)
-            .then(actualPort => {
-                console.log(`Metrics server listening at http://localhost:${actualPort}/metrics`);
-                // Update Prometheus target if needed
-                if (actualPort !== this.port) {
-                    console.log(`Note: Using port ${actualPort} instead of configured port ${this.port}`);
-                }
-            })
-            .catch(error => {
-                console.error(`Failed to start metrics server: ${error.message}`);
+        try {
+            return new Promise((resolve, reject) => {
+                // Listen on all interfaces to ensure Docker container access
+                this.server = this.app.listen(this.currentPort, '0.0.0.0', () => {
+                    const addresses = this.getServerAddresses();
+                    console.log(`Metrics server listening on port ${this.currentPort}`);
+                    console.log('Server addresses:', addresses);
+                    console.log('Available endpoints:');
+                    console.log('  - /metrics - Prometheus metrics');
+                    console.log('  - /health  - Server health check');
+                    console.log('  - /debug   - Debug information');
+                    
+                    // Start collecting metrics every 5 seconds
+                    this.metricsInterval = setInterval(async () => {
+                        try {
+                            const metrics = await this.registry.metrics();
+                            console.log(`[${new Date().toISOString()}] Metrics updated (${metrics.length} bytes)`);
+                        } catch (error) {
+                            console.error('[Metrics Collection Error]:', error);
+                        }
+                    }, 5000);
+
+                    // Start the keep-alive timer
+                    this.resetKeepAliveTimer();
+                    
+                    resolve();
+                }).on('error', (error: NodeJS.ErrnoException) => {
+                    if (error.code === 'EADDRINUSE') {
+                        console.error(`Port ${this.currentPort} is already in use. Please ensure no other process is using this port.`);
+                    }
+                    reject(error);
+                });
+
+                // Log all incoming connections
+                this.server.on('connection', (socket) => {
+                    console.log(`[${new Date().toISOString()}] New connection from ${socket.remoteAddress}:${socket.remotePort}`);
+                });
             });
+        } catch (error) {
+            console.error('[Startup Error]:', error);
+            throw error;
+        }
     }
 
-    public async close(): Promise<void> {
-        return new Promise((resolve) => {
-            if (this.server) {
-                this.server.close(() => {
+    private getServerAddresses(): string[] {
+        const addresses: string[] = [];
+        const networkInterfaces = require('os').networkInterfaces();
+        
+        for (const interfaceName in networkInterfaces) {
+            const interfaces = networkInterfaces[interfaceName];
+            for (const iface of interfaces) {
+                // Include both internal and external IPv4 addresses for debugging
+                if (iface.family === 'IPv4') {
+                    addresses.push(`${iface.address}:${this.currentPort}`);
+                }
+            }
+        }
+        
+        return addresses;
+    }
+
+    private async handleShutdown() {
+        if (this.isShuttingDown) return;
+        this.isShuttingDown = true;
+        console.log('Received shutdown signal, cleaning up...');
+        await this.close();
+        process.exit(0);
+    }
+
+    async close(): Promise<void> {
+        return new Promise<void>((resolve) => {
+            const cleanup = () => {
+                if (this.keepAliveTimer) {
+                    clearTimeout(this.keepAliveTimer);
+                    this.keepAliveTimer = null;
+                }
+                
+                if (this.metricsInterval) {
+                    clearInterval(this.metricsInterval);
+                    this.metricsInterval = null;
+                }
+                
+                this.registry.clear();
+                
+                if (this.server) {
+                    this.server.close(() => {
+                        this.server = null;
+                        MetricsServer.instance = null;
+                        console.log('Metrics server and resources cleaned up');
+                        resolve();
+                    });
+                } else {
                     resolve();
+                }
+            };
+
+            if (this.server) {
+                this.server.getConnections((err, count) => {
+                    if (count > 0) {
+                        console.log(`Closing ${count} active connections...`);
+                    }
+                    cleanup();
                 });
             } else {
-                resolve();
+                cleanup();
             }
         });
+    }
+
+    getCurrentPort(): number {
+        return this.currentPort;
     }
 }

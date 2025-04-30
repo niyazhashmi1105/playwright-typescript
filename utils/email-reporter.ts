@@ -6,9 +6,11 @@ import path from 'path';
 interface TestResultSummary {
     passed: { title: string; browser: string }[];
     failed: { title: string; browser: string; error: string }[];
+    skipped: { title: string; browser: string }[];
     total: number;
     passCount: number;
     failCount: number;
+    skipCount: number;
 }
 
 interface BrowserMetrics {
@@ -16,6 +18,7 @@ interface BrowserMetrics {
     total: number;
     passed: number;
     failed: number;
+    skipped: number;
 }
 
 export default class EmailReporter implements Reporter {
@@ -28,9 +31,11 @@ export default class EmailReporter implements Reporter {
         this.summary = {
             passed: [],
             failed: [],
+            skipped: [],
             total: 0,
             passCount: 0,
-            failCount: 0
+            failCount: 0,
+            skipCount: 0
         };
         this.activeProjects = new Set();
         this.browserMetrics = new Map();
@@ -53,23 +58,34 @@ export default class EmailReporter implements Reporter {
             browser: projectName,
             total: 0,
             passed: 0,
-            failed: 0
+            failed: 0,
+            skipped: 0
         };
         metrics.total++;
-        if (result.status === 'passed') {
-            metrics.passed++;
-            this.summary.passed.push({ title: test.title, browser: projectName });
-            this.summary.passCount++;
-        } else if (result.status === 'failed') {
-            metrics.failed++;
-            const errorMessage = this.formatErrorMessage(result.error?.message || 'Unknown error');
-            this.summary.failed.push({
-                title: test.title,
-                browser: projectName,
-                error: errorMessage
-            });
-            this.summary.failCount++;
+        
+        switch (result.status) {
+            case 'passed':
+                metrics.passed++;
+                this.summary.passed.push({ title: test.title, browser: projectName });
+                this.summary.passCount++;
+                break;
+            case 'failed':
+                metrics.failed++;
+                const errorMessage = this.formatErrorMessage(result.error?.message || 'Unknown error');
+                this.summary.failed.push({
+                    title: test.title,
+                    browser: projectName,
+                    error: errorMessage
+                });
+                this.summary.failCount++;
+                break;
+            case 'skipped':
+                metrics.skipped++;
+                this.summary.skipped.push({ title: test.title, browser: projectName });
+                this.summary.skipCount++;
+                break;
         }
+        
         this.browserMetrics.set(projectName, metrics);
         this.summary.total++;
     }
@@ -95,12 +111,17 @@ export default class EmailReporter implements Reporter {
             total: this.summary.total,
             passed: this.summary.passCount,
             failed: this.summary.failCount,
+            skipped: this.summary.skipCount,
             duration: duration,
             browserBreakdown: Array.from(this.browserMetrics.values()),
             failedTests: this.summary.failed.map(test => ({
                 name: test.title,
                 browser: test.browser,
                 error: test.error
+            })),
+            skippedTests: this.summary.skipped.map(test => ({
+                name: test.title,
+                browser: test.browser
             }))
         };
 

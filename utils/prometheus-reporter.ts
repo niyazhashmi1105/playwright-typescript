@@ -16,8 +16,9 @@ export default class PrometheusReporter implements Reporter {
     private isGitHubAction: boolean;
 
     constructor() {
-        const port = process.env.METRICS_PORT ? parseInt(process.env.METRICS_PORT) : 9323;
-        this.metricsServer = new MetricsServer(port);
+        // Always use port 9323 for consistency
+        const port = 9323;
+        this.metricsServer = MetricsServer.getInstance(port);
         this.isGitHubAction = process.env.GITHUB_ACTIONS === 'true';
         const registry = this.metricsServer.getRegistry();
 
@@ -86,19 +87,23 @@ export default class PrometheusReporter implements Reporter {
         });
     }
 
-    onBegin(config: FullConfig): void {
+    async onBegin(config: FullConfig): Promise<void> {
         console.log('Starting metrics server...');
-        this.metricsServer.start();
-        console.log('Metrics server started');
-        
-        config.projects.forEach(project => {
-            console.log(`Setting gauge for project ${project.name}`);
-            this.testSuiteGauge.set({ 
-                project: project.name,
-                browser: project.use?.browserName || 'unknown',
-                status: 'running'
-            }, 1);
-        });
+        try {
+            await this.metricsServer.start();
+            
+            config.projects.forEach(project => {
+                console.log(`Setting gauge for project ${project.name}`);
+                this.testSuiteGauge.set({ 
+                    project: project.name,
+                    browser: project.use?.browserName || 'unknown',
+                    status: 'running'
+                }, 1);
+            });
+        } catch (error) {
+            console.error('Failed to start metrics server:', error);
+            // Don't throw the error to allow tests to continue without metrics
+        }
     }
 
     onTestBegin(test: TestCase): void {
@@ -118,29 +123,13 @@ export default class PrometheusReporter implements Reporter {
         const project = test.parent.project()?.name || 'unknown';
         const suite = test.parent.title || 'unknown';
 
-        // Decrement active tests
-        this.activeTestsGauge.dec({
-            browser,
-            project,
-            suite
-        });
-        
-        // Record test result
-        this.testCounter.inc({ 
+        // Increment test counter
+        this.testCounter.inc({
             status: result.status,
             project,
             browser,
             suite
         });
-
-        // Record retries if any
-        if (result.retry > 0) {
-            this.retryCounter.inc({ 
-                testName: test.title,
-                browser,
-                project
-            });
-        }
 
         // Record test duration
         this.testDurationHistogram.observe(
@@ -154,7 +143,23 @@ export default class PrometheusReporter implements Reporter {
             result.duration / 1000
         );
 
-        // Record memory usage if exists in result metadata
+        // Decrement active tests
+        this.activeTestsGauge.dec({
+            browser,
+            project,
+            suite
+        });
+
+        // Record retry count if any
+        if (result.retry > 0) {
+            this.retryCounter.inc({
+                testName: test.title,
+                browser,
+                project
+            });
+        }
+
+        // Record memory usage if available
         const memoryUsage = (result as any).metadata?.memoryUsage;
         if (memoryUsage) {
             this.memoryGauge.set(
@@ -201,21 +206,16 @@ export default class PrometheusReporter implements Reporter {
     async onEnd(): Promise<void> {
         console.log('Tests completed - finalizing metrics...');
         
-        // In GitHub Actions, we close the server immediately
-        if (this.isGitHubAction) {
+        try {
+            // Keep metrics server running for 30 seconds after tests complete
+            // This gives Prometheus time to scrape final metrics
+            console.log('Keeping metrics server alive for 30 seconds to allow final scraping...');
+            await new Promise(resolve => setTimeout(resolve, 30000));
+            
             await this.metricsServer.close();
-            console.log('Metrics server closed');
-            return;
+            console.log('Metrics server closed successfully');
+        } catch (error) {
+            console.error('Error closing metrics server:', error);
         }
-
-        // For local development, keep the server running with Ctrl+C handler
-        process.on('SIGINT', async () => {
-            console.log('Received SIGINT, shutting down metrics server...');
-            await this.metricsServer.close();
-            process.exit(0);
-        });
-
-        console.log('Metrics server running at http://localhost:9323/metrics');
-        console.log('Press Ctrl+C to stop');
     }
 }

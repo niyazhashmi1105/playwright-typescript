@@ -19,6 +19,8 @@ services:
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - monitoring
 
   alertmanager:
     image: prom/alertmanager:latest
@@ -30,6 +32,8 @@ services:
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--storage.path=/alertmanager'
+    networks:
+      - monitoring
     environment:
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
@@ -67,9 +71,15 @@ services:
       - prometheus
       - alertmanager
     restart: unless-stopped
+    networks:
+      - monitoring
     extra_hosts:
       - "host.docker.internal:host-gateway"
     user: "472"
+
+networks:
+  monitoring:
+    driver: bridge
 
 volumes:
   prometheus_data: {}

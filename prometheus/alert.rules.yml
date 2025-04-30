@@ -1,38 +1,38 @@
 groups:
-- name: playwright_alerts
+- name: playwright_test_alerts
   rules:
-  - alert: TestFailures
-    expr: sum(playwright_tests_total{status="failed"}) > 0
-    for: 30s
-    labels:
-      severity: critical
-    annotations:
-      summary: Test failures detected
-      description: One or more Playwright tests have failed
-
-  - alert: HighTestDuration
-    expr: rate(playwright_test_duration_seconds_sum[1m]) > 300
-    for: 1m
-    labels:
-      severity: warning
-    annotations:
-      summary: Tests running slower than expected
-      description: Average test duration is higher than 5 minutes
-
   - alert: BrowserSpecificFailures
-    expr: sum by (browser) (playwright_tests_total{status="failed"}) > 0
+    expr: sum by (browser) (rate(playwright_tests_total{status="failed"}[5m])) > 0
     for: 30s
     labels:
       severity: warning
     annotations:
       summary: Browser-specific test failures
-      description: "{{ $labels.browser }} has test failures"
+      description: "{{ $labels.browser }} has failures in the last 5 minutes"
 
-  - alert: HighMemoryUsage
-    expr: process_resident_memory_bytes > 1000000000
+  - alert: PlaywrightTestAlertLongDuration
+    expr: rate(playwright_test_duration_seconds_sum[5m]) / rate(playwright_test_duration_seconds_count[5m]) > 30
     for: 1m
     labels:
       severity: warning
     annotations:
-      summary: High memory usage in test execution
-      description: Memory usage exceeds 1GB
+      summary: Tests taking too long
+      description: "Average test duration is above 30 seconds"
+
+  - alert: PlaywrightTestAlertHighErrorRate
+    expr: sum(rate(playwright_test_errors_total[5m])) > 2
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: High error rate
+      description: "More than 2 errors per minute detected"
+
+  - alert: PlaywrightTestAlertStuckTests
+    expr: playwright_active_tests > 0 and rate(playwright_tests_total[5m]) == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: Tests appear to be stuck
+      description: "Active tests detected but no test completions in the last 5 minutes"
