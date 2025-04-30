@@ -10,10 +10,6 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        shard: [1, 2]
-      fail-fast: false
     
     env:
       GRAFANA_URL: http://grafana:3000
@@ -179,57 +175,28 @@ jobs:
           node:lts \
           tail -f /dev/null
 
-        # Run tests and post-test tasks with sharding
+        # Run tests and post-test tasks
         docker exec test-runner npm install
         docker exec test-runner npx playwright install --with-deps
-        docker exec test-runner npx playwright test --shard=${{ matrix.shard }}/2 --reporter=html,line
-        docker exec test-runner npm run post:test
-        docker exec test-runner npm run upload:dashboard
-        
-        # Copy the reports out of the container
-        docker cp test-runner:/app/playwright-report ./playwright-report-shard-${{ matrix.shard }}
+        docker exec test-runner npm run all:headless
+        # docker exec test-runner npm run post:test
+        # docker exec test-runner npm run upload:dashboard
         
         # Stop the container
         docker stop test-runner
         docker rm test-runner
-      timeout-minutes: 30
+      timeout-minutes: 10
       
-    - name: Upload shard reports
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-report-shard-${{ matrix.shard }}
-        path: playwright-report-shard-${{ matrix.shard }}
-        retention-days: 1
-        if-no-files-found: warn
-
-    - name: Download all shard reports
-      if: always() && matrix.shard == 2
-      uses: actions/download-artifact@v4
-      with:
-        pattern: playwright-report-shard-*
-        path: all-shards
-        merge-multiple: true
-
-    - name: Merge test results
-      if: always() && matrix.shard == 2
-      run: |
-        # Create the final report directory
-        mkdir -p playwright-report
-        # Merge all shard reports
-        npx playwright merge-reports ./all-shards
-
     - name: Check Prometheus targets
       if: always()
       run: curl -s http://localhost:9090/api/v1/targets | jq .
-      timeout-minutes: 2
+      timeout-minutes: 1
         
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-reports-shard-${{ matrix.shard }}
+        name: playwright-report
         path: |
-          my-report/
           playwright-report/
           test-results/
         retention-days: 1
