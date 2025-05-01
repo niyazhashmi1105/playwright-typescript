@@ -42,7 +42,6 @@ RUN apt-get update && apt-get install -y \
     libevent-2.1-7 \
     libopus0 \
     libharfbuzz-icu0 \
-    # Adding missing dependencies
     libxslt1.1 \
     libwoff1 \
     gstreamer1.0-plugins-base \
@@ -62,5 +61,15 @@ RUN npm init -y && \
     npm install -g playwright && \
     npx playwright install && \
     npx playwright install-deps
+
+# Create directory for environment files
+RUN mkdir -p /var/jenkins_home/environment
+
+# Copy environment files
+COPY .env /var/jenkins_home/environment/
+COPY jenkins-env-loader.sh /var/jenkins_home/environment/
+
+# Make the loader script executable
+RUN chmod +x /var/jenkins_home/environment/jenkins-env-loader.sh
 
 USER jenkins

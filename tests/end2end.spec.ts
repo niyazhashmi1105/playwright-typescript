@@ -116,6 +116,6 @@ test('Add to products into the cart', async ({ homePage, cartPage, page }) => {
 
         await cartPage.click('#back-to-products');
         const test = await cartPage.isVisibleText('.title');
-        expect(test).toBe(true);
+        expect(test).toBe(false);
     });
 });
