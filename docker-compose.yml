@@ -17,6 +17,8 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     restart: unless-stopped
+    networks:
+      - monitoring-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -38,6 +40,8 @@ services:
       - SMTP_TO=${SMTP_TO}
       - ALERTMANAGER_EMAIL_PASSWORD=${ALERTMANAGER_EMAIL_PASSWORD}
     restart: unless-stopped
+    networks:
+      - monitoring-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -67,8 +71,8 @@ services:
       - prometheus
       - alertmanager
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - monitoring-network
     user: "472"
 
   jenkins:
@@ -79,9 +83,15 @@ services:
     ports:
       - "8080:8080"
       - "50000:50000"
+      - "9323:9323"  # Expose metrics port
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - JENKINS_USER=${JENKINS_USER}
+      - JENKINS_TOKEN=${JENKINS_TOKEN}
+      - METRICS_PORT=9323
+      - PLAYWRIGHT_METRICS=true
     restart: unless-stopped
     networks:
       - monitoring-network

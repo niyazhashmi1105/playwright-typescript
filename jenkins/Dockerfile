@@ -72,4 +72,12 @@ COPY jenkins-env-loader.sh /var/jenkins_home/environment/
 # Make the loader script executable
 RUN chmod +x /var/jenkins_home/environment/jenkins-env-loader.sh
 
+# Install Jenkins plugins including metrics
+COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
+RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
+
 USER jenkins
+
+# Enable Prometheus metrics endpoint
+ENV JENKINS_OPTS="--httpPort=8080 --prefix=/jenkins"
+ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Dhudson.model.UsageStatistics.disabled=true -Djenkins.metrics.prometheus.path=/prometheus -Djenkins.metrics.api.enabled=true"

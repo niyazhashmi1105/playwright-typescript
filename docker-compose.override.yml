@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  jenkins:
+    environment:
+      - JENKINS_USER=${JENKINS_USER:-admin}
+      - JENKINS_TOKEN=${JENKINS_TOKEN:-admin}
+      - METRICS_PORT=9323
+      - PLAYWRIGHT_METRICS=true
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false -Dhudson.model.UsageStatistics.disabled=true -Djenkins.metrics.prometheus.path=/prometheus -Djenkins.metrics.api.enabled=true
+    ports:
+      - "9323:9323"
+
+  prometheus:
+    environment:
+      - JENKINS_USER=${JENKINS_USER:-admin}
+      - JENKINS_TOKEN=${JENKINS_TOKEN:-admin}
