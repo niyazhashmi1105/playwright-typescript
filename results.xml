@@ -1,0 +1,38 @@
+<testsuites id="" name="" tests="15" failures="0" skipped="0" errors="0" time="20.396325">
+<testsuite name="end2end.spec.ts" timestamp="2025-05-01T03:44:04.806Z" hostname="chromium" tests="5" failures="0" skipped="0" time="8.813" errors="0">
+<testcase name="count the number of products" classname="end2end.spec.ts" time="2.021">
+</testcase>
+<testcase name="check the product available or not" classname="end2end.spec.ts" time="2.03">
+</testcase>
+<testcase name="Add the product into the cart and assert if it is added or not" classname="end2end.spec.ts" time="2.142">
+</testcase>
+<testcase name="Check the first and last product before applying filter and after applying the filter" classname="end2end.spec.ts" time="1.204">
+</testcase>
+<testcase name="Add to products into the cart" classname="end2end.spec.ts" time="1.416">
+</testcase>
+</testsuite>
+<testsuite name="end2end.spec.ts" timestamp="2025-05-01T03:44:04.806Z" hostname="firefox" tests="5" failures="0" skipped="0" time="15.442" errors="0">
+<testcase name="count the number of products" classname="end2end.spec.ts" time="3.28">
+</testcase>
+<testcase name="check the product available or not" classname="end2end.spec.ts" time="4.222">
+</testcase>
+<testcase name="Add the product into the cart and assert if it is added or not" classname="end2end.spec.ts" time="3.429">
+</testcase>
+<testcase name="Check the first and last product before applying filter and after applying the filter" classname="end2end.spec.ts" time="1.993">
+</testcase>
+<testcase name="Add to products into the cart" classname="end2end.spec.ts" time="2.518">
+</testcase>
+</testsuite>
+<testsuite name="end2end.spec.ts" timestamp="2025-05-01T03:44:04.806Z" hostname="webkit" tests="5" failures="0" skipped="0" time="11.527" errors="0">
+<testcase name="count the number of products" classname="end2end.spec.ts" time="2.598">
+</testcase>
+<testcase name="check the product available or not" classname="end2end.spec.ts" time="2.673">
+</testcase>
+<testcase name="Add the product into the cart and assert if it is added or not" classname="end2end.spec.ts" time="2.828">
+</testcase>
+<testcase name="Check the first and last product before applying filter and after applying the filter" classname="end2end.spec.ts" time="1.533">
+</testcase>
+<testcase name="Add to products into the cart" classname="end2end.spec.ts" time="1.895">
+</testcase>
+</testsuite>
+</testsuites>

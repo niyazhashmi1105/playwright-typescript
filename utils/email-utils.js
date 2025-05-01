@@ -1,4 +1,6 @@
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 
 class EmailUtils {
     static async sendTestReport(metrics) {
@@ -37,12 +39,12 @@ class EmailUtils {
                         user: process.env.SMTP_USER,
                         pass: process.env.SMTP_PASSWORD
                     },
-                    pool: true, // Use pooled connections
-                    maxConnections: 1, // Limit concurrent connections
-                    maxMessages: 3, // Limit messages per connection
-                    rateDelta: 1000, // Minimum time between messages
-                    rateLimit: 3, // Maximum number of messages per rateDelta
-                    logger: process.env.DEBUG === 'true' // Enable logging if DEBUG=true
+                    pool: true,
+                    maxConnections: 1,
+                    maxMessages: 3,
+                    rateDelta: 1000,
+                    rateLimit: 3,
+                    logger: process.env.DEBUG === 'true'
                 });
 
                 // Wait for connection pool to be ready
@@ -53,11 +55,24 @@ class EmailUtils {
 
                 const emailContent = EmailUtils.generateEmailContent(metrics);
                 
+                // Check if HTML report exists
+                const reportPath = path.join(process.cwd(), 'playwright-report/index.html');
+                let attachments = [];
+                
+                if (fs.existsSync(reportPath)) {
+                    attachments.push({
+                        filename: 'playwright-report.html',
+                        content: fs.readFileSync(reportPath, 'utf-8'),
+                        contentType: 'text/html'
+                    });
+                }
+
                 await transporter.sendMail({
                     from: `"${process.env.SMTP_FROM_NAME || 'Test Reporter'}" <${process.env.SMTP_FROM}>`,
                     to: process.env.SMTP_TO,
                     subject: `Test Report ${metrics.failed > 0 ? '❌ Failed' : '✅ Passed'} (${(metrics.passed / metrics.total * 100).toFixed(2)}% Pass Rate)`,
-                    html: emailContent
+                    html: emailContent,
+                    attachments: attachments
                 });
 
                 // Close the connection pool
@@ -191,6 +206,13 @@ class EmailUtils {
                         background-color: ${hasFailures ? '#fee2e2' : '#dcfce7'};
                         color: ${hasFailures ? '#dc2626' : '#16a34a'};
                     }
+                    .note {
+                        font-size: 14px;
+                        color: #666;
+                        margin-top: 20px;
+                        padding-top: 20px;
+                        border-top: 1px solid #e5e7eb;
+                    }
                 </style>
             </head>
             <body>
@@ -264,6 +286,10 @@ class EmailUtils {
                             '⚠️ Action Required: Please investigate the failed tests.' : 
                             '✅ All tests passed successfully!'
                         }
+                    </div>
+
+                    <div class="note">
+                        Note: Detailed HTML report is attached to this email.
                     </div>
                 </div>
             </body>
