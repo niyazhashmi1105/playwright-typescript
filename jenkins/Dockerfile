@@ -32,6 +32,7 @@ RUN apt-get update && apt-get install -y \
     libpango-1.0-0 \
     libappindicator3-1 \
     libgtk-3-0 \
+    libgtk-4-1 \
     libgraphene-1.0-0 \
     libxslt1.1 \
     libvpx7 \
@@ -48,6 +49,8 @@ RUN apt-get update && apt-get install -y \
     libhyphen0 \
     libmanette-0.2-0 \
     libgles2 \
-    libx264-dev
+    libx264-dev \
+    woff2 \
+    libavcodec59
 
 USER jenkins
