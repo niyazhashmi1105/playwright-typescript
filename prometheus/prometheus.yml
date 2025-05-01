@@ -20,7 +20,7 @@ scrape_configs:
       insecure_skip_verify: true
 
   - job_name: 'jenkins'
-    metrics_path: '/jenkins/prometheus'
+    metrics_path: '/prometheus'
     static_configs:
       - targets: ['jenkins:8080']
     scheme: http

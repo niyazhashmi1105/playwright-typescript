@@ -5,9 +5,10 @@ services:
     environment:
       - JENKINS_USER=${JENKINS_USER:-admin}
       - JENKINS_TOKEN=${JENKINS_TOKEN:-admin}
+      - JENKINS_OPTS=--httpPort=8080
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false -Dhudson.model.UsageStatistics.disabled=true -Djenkins.prometheus.metricspath=/metrics -Djenkins.prometheus.namespace=jenkins -Djenkins.prometheus.defaultDateFormat=
+      - PROMETHEUS_GLOBAL_ON=true
       - METRICS_PORT=8080
-      - PLAYWRIGHT_METRICS=true
-      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false -Dhudson.model.UsageStatistics.disabled=true -Djenkins.metrics.prometheus.path=/jenkins/prometheus -Djenkins.metrics.api.enabled=true
     ports:
       - "9323:9323"
 
