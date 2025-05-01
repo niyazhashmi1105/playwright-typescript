@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "chrome:ui": "npx playwright test --project chromium --headed end2end.spec.ts",
+    "chrome:headless": "npx playwright test --project chromium",
     "all:ui": "npx playwright test --headed end2end.spec.ts",
     "all:headless": "npx playwright test end2end.spec.ts",
     "postinstall": "npm update browserstack-node-sdk",
