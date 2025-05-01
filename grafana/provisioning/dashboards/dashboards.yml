@@ -9,7 +9,18 @@ providers:
     disableDeletion: false
     editable: true
     updateIntervalSeconds: 10
-    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true
+
+  - name: 'Jenkins'
+    orgId: 1
+    folder: 'Jenkins'
+    folderUid: ''
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 10
     options:
       path: /etc/grafana/dashboards
       foldersFromFilesStructure: true
