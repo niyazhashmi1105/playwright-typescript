@@ -41,12 +41,26 @@ RUN apt-get update && apt-get install -y \
     libvpx7 \
     libevent-2.1-7 \
     libopus0 \
-    libharfbuzz-icu0
+    libharfbuzz-icu0 \
+    # Adding missing dependencies
+    libxslt1.1 \
+    libwoff1 \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    flite1-dev \
+    libwebp-dev \
+    libenchant-2-2 \
+    libsecret-1-0 \
+    libhyphen0 \
+    libmanette-0.2-0 \
+    libgles2 \
+    x264
 
 # Install Playwright
 RUN npm init -y && \
     npm install -g playwright && \
-    npx playwright install-deps chromium && \
-    npx playwright install chromium
+    npx playwright install && \
+    npx playwright install-deps
 
 USER jenkins
