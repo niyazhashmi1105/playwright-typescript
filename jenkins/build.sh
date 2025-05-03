@@ -12,29 +12,23 @@ npm install
 # Install Playwright browsers
 npx playwright install
 
-# Create directories for test results
+# Create directories
 mkdir -p test-results
 mkdir -p playwright-report
 
-# Run tests and store results (allow failure)
-npm run all:headless || true
+# Run tests (allow failure but capture exit code)
+npm run all:headless
+TEST_EXIT_CODE=$?
 
-# Ensure proper permissions for test artifacts
-chmod -R 777 test-results
+# Generate static HTML report (don't serve it)
+npx playwright show-report --no-server > /dev/null 2>&1
+
+# Set permissions
 chmod -R 777 playwright-report
-chmod -R 777 allure-results
+chmod -R 777 test-results
 
-# Run post-test processing (allow failure)
+# Run post-test processing
 npm run post:test || true
 
-# Check if test results exist
-if [ ! -f "test-results/test-results.json" ]; then
-    echo "No test results found. Creating empty results file..."
-    echo '{"stats": {"failures": 1, "tests": 0}}' > test-results/test-results.json
-fi
-
-# Always generate HTML report
-npx playwright show-report
-
-# Exit successfully to not fail the build
-exit 0
+# Exit with original test exit code
+exit ${TEST_EXIT_CODE}
