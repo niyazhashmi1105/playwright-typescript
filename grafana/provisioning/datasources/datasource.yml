@@ -9,5 +9,3 @@ datasources:
     isDefault: true
     jsonData:
       timeInterval: 10s
-      httpMethod: GET
-    editable: true

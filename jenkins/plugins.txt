@@ -1,5 +1,4 @@
-prometheus:819.v50953a_c560dd
-metrics:4.2.30-471.v55fa_495f2b_f5
+prometheus:2.2.3
 git:5.0.0
 configuration-as-code:1932.v75cb_b_f1b_698d
 cloudbees-disk-usage-simple:241.v0ea_d9a_a_96ee8
