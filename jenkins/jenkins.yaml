@@ -1,0 +1,21 @@
+jenkins:
+  systemMessage: "Jenkins configured automatically by Jenkins Configuration as Code plugin"
+  numExecutors: 2
+  scmCheckoutRetryCount: 2
+  mode: NORMAL
+
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: JENKINS_PROMETHEUS_ENDPOINT
+            value: "/prometheus"
+
+unclassified:
+  prometheusConfiguration:
+    path: /prometheus
+    useAuthenticatedEndpoint: false
+    
+  metricsaccesskey:
+    accessKeys:
+      - key: "prometheus"
+        description: "Prometheus access key"

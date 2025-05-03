@@ -13,7 +13,7 @@ if (!GRAFANA_API_KEY) {
 }
 
 async function uploadDashboard() {
-    const dashboardPath = path.join(__dirname, '..', 'grafana', 'dashboard.json');
+    const dashboardPath = path.join(__dirname, '..', 'grafana', 'dashboards', 'jenkins.json');
     
     // Check if dashboard file exists
     if (!fs.existsSync(dashboardPath)) {
