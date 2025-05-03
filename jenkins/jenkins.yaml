@@ -3,6 +3,9 @@ jenkins:
   numExecutors: 2
   scmCheckoutRetryCount: 2
   mode: NORMAL
+  agentProtocols:
+    - "JNLP4-connect"
+    - "Ping"
 
   globalNodeProperties:
     - envVars:
@@ -12,10 +15,28 @@ jenkins:
 
 unclassified:
   prometheusConfiguration:
-    path: /prometheus
+    collectDiskUsage: true
+    collectingMetricsPeriodInSeconds: 15
+    defaultNamespace: "jenkins"
+    path: "/prometheus"
     useAuthenticatedEndpoint: false
-    
+    appendStatusToMetricName: false
+    appendPutInZeroWhenNothingReport: true
+
+  monitoring:
+    endpoints:
+      - id: "prometheus"
+        path: "/prometheus"
+        enabled: true
+
   metricsaccesskey:
     accessKeys:
-      - key: "prometheus"
+      - key: "${JENKINS_TOKEN}"
         description: "Prometheus access key"
+
+security:
+  metricsRealm:
+    allowAnonymousAccess: true
+
+metrics:
+  globalMetrics: true

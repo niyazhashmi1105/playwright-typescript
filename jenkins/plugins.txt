@@ -1,6 +1,6 @@
 prometheus:latest
-metrics:latest
 monitoring:latest
+metrics:latest
 git:latest
 junit:latest
 credentials:latest
