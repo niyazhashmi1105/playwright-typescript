@@ -8,7 +8,6 @@ export default class PrometheusReporter implements Reporter {
     private testDurationHistogram: Histogram<string>;
     private activeTestsGauge: Gauge<string>;
     private testStepCounter: Counter<string>;
-    private retryCounter: Counter<string>;
     private testSuiteGauge: Gauge<string>;
     private browserMetricsGauge: Gauge<string>;
     private errorCounter: Counter<string>;
@@ -26,7 +25,6 @@ export default class PrometheusReporter implements Reporter {
         this.testDurationHistogram = this.metricsServer.getTestDurationHistogram();
         this.activeTestsGauge = this.metricsServer.getActiveTestsGauge();
         this.testStepCounter = this.metricsServer.getTestStepCounter();
-        this.retryCounter = this.metricsServer.getRetryCounter();
         this.testSuiteGauge = this.metricsServer.getTestSuiteGauge();
         this.browserMetricsGauge = this.metricsServer.getBrowserMetricsGauge();
         this.errorCounter = this.metricsServer.getErrorCounter();
@@ -48,7 +46,7 @@ export default class PrometheusReporter implements Reporter {
                     project: project.name,
                     browser: project.use?.browserName || 'unknown',
                     status: 'running'
-                }, 0); // Initialize with 0
+                }, 0);
             });
         } catch (error) {
             console.error('Failed to start metrics server:', error);
@@ -109,15 +107,6 @@ export default class PrometheusReporter implements Reporter {
             project,
             suite
         });
-
-        // Record retry count if any
-        if (result.retry > 0) {
-            this.retryCounter.inc({
-                testName: test.title,
-                browser,
-                project
-            });
-        }
 
         // Track final memory usage
         const memoryUsage = process.memoryUsage();

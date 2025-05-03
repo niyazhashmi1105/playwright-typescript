@@ -12,6 +12,10 @@ rm -rf test-results/* || true
 mkdir -p playwright-report
 mkdir -p test-results
 
+# Set CI environment variable
+export CI=true
+echo "Running in CI environment"
+
 # Install dependencies
 echo "Installing dependencies..."
 npm install
@@ -41,8 +45,8 @@ fi
 echo "Debug: Listing report directory contents"
 ls -la playwright-report/
 
-# Run post-test processing
+# Run post-test processing with proper environment
 echo "Running post-test processing..."
-npm run post:test || true
+CI=true npm run post:test || true
 
 echo "Build script completed"

@@ -45,7 +45,7 @@ export default defineConfig({
   timeout: 60 * 1000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 0 : 0,
+  retries: 0, // Disabled retries completely
   workers: process.env.CI ? 1 : 1,
   reporter: [
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
@@ -59,9 +59,9 @@ export default defineConfig({
   globalSetup: './global-setup',
   globalTeardown: './global-teardown',
   use: {
-    trace: 'retain-on-failure',
+    trace: 'off', // No trace since we're not retrying
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure'
+    video: 'on', // Changed from on-first-retry to capture video for all tests
   },
   projects: [
     {

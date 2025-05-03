@@ -25,82 +25,42 @@ class EmailUtils {
             return;
         }
 
-        // Retry configuration
-        const maxRetries = 3;
-        const baseDelay = 5000; // 5 seconds
-
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            try {
-                const transporter = nodemailer.createTransport({
-                    host: process.env.SMTP_HOST,
-                    port: parseInt(process.env.SMTP_PORT),
-                    secure: process.env.SMTP_PORT === '465',
-                    auth: {
-                        user: process.env.SMTP_USER,
-                        pass: process.env.SMTP_PASSWORD
-                    },
-                    pool: true,
-                    maxConnections: 1,
-                    maxMessages: 3,
-                    rateDelta: 1000,
-                    rateLimit: 3,
-                    logger: process.env.DEBUG === 'true'
-                });
-
-                // Wait for connection pool to be ready
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                // Verify SMTP connection configuration
-                await transporter.verify();
-
-                const emailContent = EmailUtils.generateEmailContent(metrics);
-                
-                // Check if HTML report exists
-                const reportPath = path.join(process.cwd(), 'playwright-report/index.html');
-                let attachments = [];
-                
-                if (fs.existsSync(reportPath)) {
-                    attachments.push({
-                        filename: 'playwright-report.html',
-                        content: fs.readFileSync(reportPath, 'utf-8'),
-                        contentType: 'text/html'
-                    });
+        try {
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: parseInt(process.env.SMTP_PORT || '587'),
+                secure: process.env.SMTP_TLS === 'true',
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASSWORD
                 }
+            });
 
-                await transporter.sendMail({
-                    from: `"${process.env.SMTP_FROM_NAME || 'Test Reporter'}" <${process.env.SMTP_FROM}>`,
-                    to: process.env.SMTP_TO,
-                    subject: `Test Report ${metrics.failed > 0 ? '❌ Failed' : '✅ Passed'} (${(metrics.passed / metrics.total * 100).toFixed(2)}% Pass Rate)`,
-                    html: emailContent,
-                    attachments: attachments
+            const attachments = [];
+            const reportPath = path.join(process.cwd(), 'playwright-report/index.html');
+            
+            if (fs.existsSync(reportPath)) {
+                attachments.push({
+                    filename: 'playwright-report.html',
+                    content: fs.readFileSync(reportPath, 'utf-8'),
+                    contentType: 'text/html'
                 });
-
-                // Close the connection pool
-                transporter.close();
-                
-                console.log('Test report email sent successfully');
-                return;
-            } catch (error) {
-                const isLastAttempt = attempt === maxRetries;
-                const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
-
-                console.error(`Failed to send email (attempt ${attempt}/${maxRetries}):`, {
-                    message: error.message,
-                    code: error.code,
-                    command: error.command
-                });
-
-                if (error.code === 'EAUTH' || error.responseCode === 454) {
-                    console.log('Gmail rate limit detected, waiting before retry...');
-                }
-
-                if (!isLastAttempt) {
-                    console.log(`Retrying in ${delay/1000} seconds...`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                } else {
-                    console.error('Max retries reached. Email could not be sent.');
-                }
             }
+
+            await transporter.sendMail({
+                from: `"${process.env.SMTP_FROM_NAME || 'Test Reporter'}" <${process.env.SMTP_FROM}>`,
+                to: process.env.SMTP_TO,
+                subject: `Test Report ${metrics.failed > 0 ? '❌ Failed' : '✅ Passed'} (${(metrics.passed / metrics.total * 100).toFixed(2)}% Pass Rate)`,
+                html: this.generateEmailContent(metrics),
+                attachments: attachments
+            });
+
+            // Close the connection pool
+            transporter.close();
+            console.log('Test report email sent successfully');
+        } catch (error) {
+            console.error('Failed to send email:', error.message);
+            // Don't throw error to avoid failing the test run
         }
     }
 

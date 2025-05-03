@@ -38,11 +38,6 @@ export class MetricsServer {
         help: 'Total number of test steps',
         labelNames: ['status', 'testName', 'stepName']
     });
-    private retryCounter: Counter<string> = new Counter({
-        name: 'playwright_test_retries_total',
-        help: 'Total number of test retries',
-        labelNames: ['testName', 'browser', 'project']
-    });
     private testSuiteGauge: Gauge<string> = new Gauge({
         name: 'playwright_test_suite_info',
         help: 'Information about the test suite execution',
@@ -220,15 +215,6 @@ export class MetricsServer {
             });
         }
 
-        if (!this.registry.getSingleMetric('playwright_test_retries_total')) {
-            this.retryCounter = new Counter({
-                name: 'playwright_test_retries_total',
-                help: 'Total number of test retries',
-                labelNames: ['testName', 'browser', 'project'],
-                registers: [this.registry]
-            });
-        }
-
         if (!this.registry.getSingleMetric('playwright_test_suite_info')) {
             this.testSuiteGauge = new Gauge({
                 name: 'playwright_test_suite_info',
@@ -348,10 +334,6 @@ export class MetricsServer {
 
     getTestStepCounter(): Counter<string> {
         return this.testStepCounter;
-    }
-
-    getRetryCounter(): Counter<string> {
-        return this.retryCounter;
     }
 
     getTestSuiteGauge(): Gauge<string> {

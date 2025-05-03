@@ -4,7 +4,8 @@ const path = require('path');
 const https = require('https');
 const http = require('http');
 
-const GRAFANA_URL = process.env.GRAFANA_URL || 'http://localhost:3002';
+// Use Docker service name when running in CI/Docker
+const GRAFANA_URL = process.env.CI ? 'http://grafana:3000' : (process.env.GRAFANA_URL || 'http://localhost:3002');
 const GRAFANA_API_KEY = process.env.GRAFANA_API_KEY;
 
 if (!GRAFANA_API_KEY) {
@@ -21,6 +22,7 @@ async function uploadDashboard() {
     }
 
     try {
+        console.log('Uploading dashboard to Grafana at:', GRAFANA_URL);
         const dashboardJson = JSON.parse(fs.readFileSync(dashboardPath, 'utf8'));
         
         // Prepare dashboard payload
@@ -56,11 +58,16 @@ async function uploadDashboard() {
                 });
             });
             
-            req.on('error', reject);
+            req.on('error', (error) => {
+                console.error('Network error:', error.message);
+                console.error('Target Grafana URL:', GRAFANA_URL);
+                reject(error);
+            });
             req.write(JSON.stringify(payload));
             req.end();
         });
     } catch (error) {
+        console.error('Error during dashboard upload:', error.message);
         if (error instanceof SyntaxError) {
             throw new Error(`Invalid JSON in dashboard file: ${error.message}`);
         }

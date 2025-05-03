@@ -7,11 +7,19 @@ const { GrafanaUtils } = require('../utils/grafana-utils');
 
 async function postTestMonitoring() {
     try {
+        console.log('Starting post-test monitoring...');
+        console.log('Environment:', process.env.CI ? 'CI/Docker' : 'Local');
+        
         // Upload dashboard if it doesn't exist
-        await uploadDashboard();
+        console.log('Uploading dashboard...');
+        await uploadDashboard().catch(error => {
+            console.error('Dashboard upload failed:', error.message);
+            // Continue execution even if dashboard upload fails
+        });
         
         // Read test results from test-results directory
         const resultsDir = path.join(process.cwd(), 'test-results');
+        console.log('Reading test results from:', resultsDir);
         
         if (!fs.existsSync(resultsDir)) {
             console.error('No test results found in test-results directory');
@@ -30,6 +38,8 @@ async function postTestMonitoring() {
             console.error('No test result files found');
             return;
         }
+
+        console.log('Found test results file:', files[0].name);
 
         // Read and parse the test results file
         const testResults = JSON.parse(fs.readFileSync(path.join(resultsDir, files[0].name)));
@@ -70,19 +80,27 @@ async function postTestMonitoring() {
         console.log('Test Execution Metrics:', JSON.stringify(metrics, null, 2));
 
         // Send notifications in parallel
-        await Promise.all([
+        const notificationPromises = [
             // Trigger Grafana alert
             GrafanaUtils.triggerAlert(metrics).catch(error => {
                 console.error('Failed to trigger Grafana alert:', error.message);
+                if (error.code === 'ECONNREFUSED') {
+                    console.error('Connection refused. If running in Docker, ensure Grafana service is accessible via Docker network');
+                }
             }),
             // Send email notification
             EmailUtils.sendTestReport(metrics).catch(error => {
                 console.error('Failed to send email notification:', error.message);
             })
-        ]);
+        ];
+
+        // Wait for all notifications but don't fail if they error
+        await Promise.allSettled(notificationPromises);
+        console.log('Post-test monitoring completed');
     } catch (error) {
         console.error('Error in post-test monitoring:', error);
-        process.exit(1);
+        // Don't exit with error code to prevent build failure
+        console.log('Continuing despite post-test monitoring error');
     }
 }
 
