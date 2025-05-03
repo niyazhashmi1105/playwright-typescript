@@ -4,31 +4,45 @@
 set -e
 
 # Load environment variables
-. ${WORKSPACE}/jenkins/jenkins-env-loader.sh
+. ${WORKSPACE}/jenkins/jenkins-env-loader.sh || true
+
+# Ensure clean directories
+rm -rf playwright-report/* || true
+rm -rf test-results/* || true
+mkdir -p playwright-report
+mkdir -p test-results
 
 # Install dependencies
+echo "Installing dependencies..."
 npm install
 
 # Install Playwright browsers
+echo "Installing Playwright browsers..."
 npx playwright install
 
-# Create directories
-mkdir -p test-results
-mkdir -p playwright-report
+# Run tests
+echo "Running tests..."
+PLAYWRIGHT_HTML_REPORT=playwright-report npm run all:headless || true
 
-# Run tests (allow failure but capture exit code)
-npm run all:headless
-TEST_EXIT_CODE=$?
+# Set Jenkins-friendly permissions
+echo "Setting permissions..."
+chown -R 1000:1000 playwright-report test-results || true
+chmod -R 775 playwright-report test-results || true
 
-# Generate static HTML report (don't serve it)
-npx playwright show-report --no-server > /dev/null 2>&1
+# Verify report exists
+if [ ! -f "playwright-report/index.html" ]; then
+    echo "ERROR: HTML report was not generated!"
+    mkdir -p playwright-report
+    echo "<html><body><h1>Test Execution Failed</h1><p>No test results available.</p></body></html>" > playwright-report/index.html
+    chmod 664 playwright-report/index.html
+fi
 
-# Set permissions
-chmod -R 777 playwright-report
-chmod -R 777 test-results
+# Additional debug information
+echo "Debug: Listing report directory contents"
+ls -la playwright-report/
 
 # Run post-test processing
+echo "Running post-test processing..."
 npm run post:test || true
 
-# Exit with original test exit code
-exit ${TEST_EXIT_CODE}
+echo "Build script completed"

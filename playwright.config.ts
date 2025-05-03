@@ -48,7 +48,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 3 : 3,
   reporter: [
-    ['html'],
+    ['html', { open: 'never', outputFolder: 'playwright-report' }],
     ['list'],
     ['junit', { outputFile: 'results.xml' }],
     ['allure-playwright'],
@@ -59,8 +59,9 @@ export default defineConfig({
   globalSetup: './global-setup',
   globalTeardown: './global-teardown',
   use: {
-    trace: 'on-first-retry',
-    screenshot:'only-on-failure',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure'
   },
   projects: [
     {
