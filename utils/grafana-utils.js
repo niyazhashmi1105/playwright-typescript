@@ -3,11 +3,12 @@ const axios = require('axios');
 class GrafanaUtils {
     static async triggerAlert(metrics) {
         try {
-            const grafanaUrl = process.env.GRAFANA_URL;
+            // Use Docker service name and internal port if running in Docker
+            const grafanaUrl = process.env.CI ? 'http://grafana:3000' : (process.env.GRAFANA_URL || 'http://localhost:3002');
             const grafanaApiKey = process.env.GRAFANA_API_KEY;
 
-            if (!grafanaUrl || !grafanaApiKey) {
-                console.warn('Grafana configuration missing. Set GRAFANA_URL and GRAFANA_API_KEY in .env file');
+            if (!grafanaApiKey) {
+                console.warn('Grafana API key missing. Set GRAFANA_API_KEY in .env file');
                 return;
             }
 
@@ -34,8 +35,9 @@ class GrafanaUtils {
                     : 'All tests passed successfully'
             };
 
+            console.log('Connecting to Grafana at:', grafanaUrl);
+
             // Send metrics to Grafana using the correct API endpoint
-            // Using Grafana's HTTP API endpoint for annotations which is more commonly available
             const response = await axios({
                 method: 'post',
                 url: `${grafanaUrl}/api/annotations`,
@@ -48,7 +50,8 @@ class GrafanaUtils {
                     tags: ['test-execution', metrics.failed > 0 ? 'test-failure' : 'test-success'],
                     text: alertPayload.message,
                     ...alertPayload
-                }
+                },
+                timeout: 5000 // 5 second timeout
             });
 
             if (response.status >= 200 && response.status < 300) {
@@ -68,7 +71,8 @@ class GrafanaUtils {
                 url: error.config?.url,
                 data: error.response?.data
             });
-            throw error;
+            // Don't throw the error, just log it to prevent build failure
+            console.log('Continuing despite Grafana connection error');
         }
     }
 }
