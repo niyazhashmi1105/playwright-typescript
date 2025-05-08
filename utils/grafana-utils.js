@@ -4,7 +4,7 @@ class GrafanaUtils {
     static async triggerAlert(metrics) {
         try {
             // Use Docker service name and internal port if running in Docker
-            const grafanaUrl = process.env.CI ? 'http://grafana:3000' : (process.env.GRAFANA_URL || 'http://localhost:3002');
+            const grafanaUrl = 'http://localhost:3002';
             const grafanaApiKey = process.env.GRAFANA_API_KEY;
 
             if (!grafanaApiKey) {
