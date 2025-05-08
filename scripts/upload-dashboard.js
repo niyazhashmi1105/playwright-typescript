@@ -5,11 +5,11 @@ const https = require('https');
 const http = require('http');
 
 // Use Docker service name when running in CI/Docker
-const GRAFANA_URL = process.env.CI ? 'http://grafana:3000' : (process.env.GRAFANA_URL || 'http://localhost:3002');
+const GRAFANA_URL = 'http://localhost:3002';
 const GRAFANA_API_KEY = process.env.GRAFANA_API_KEY;
 // Use default credentials if API key not available
-const GRAFANA_USER = process.env.GF_SECURITY_ADMIN_USER || 'admin';
-const GRAFANA_PASSWORD = process.env.GF_SECURITY_ADMIN_PASSWORD || 'admin';
+const GRAFANA_USER = process.env.GF_SECURITY_ADMIN_USER;
+const GRAFANA_PASSWORD = process.env.GF_SECURITY_ADMIN_PASSWORD;
 
 async function uploadDashboard() {
     const dashboardPath = path.join(__dirname, '..', 'grafana', 'dashboards', 'consolidated-dashboard.json');
