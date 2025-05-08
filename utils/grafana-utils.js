@@ -4,13 +4,14 @@ class GrafanaUtils {
     static async triggerAlert(metrics) {
         try {
             // Use Docker service name and internal port if running in Docker
-            const grafanaUrl = 'http://localhost:3002';
+            const grafanaUrl = process.env.CI ? 'http://grafana:3000' : 'http://localhost:3002';
             const grafanaApiKey = process.env.GRAFANA_API_KEY;
 
-            if (!grafanaApiKey) {
-                console.warn('Grafana API key missing. Set GRAFANA_API_KEY in .env file');
-                return;
-            }
+            // For basic auth when API key is not available
+            const grafanaUser = process.env.GF_SECURITY_ADMIN_USER ;
+            const grafanaPassword = process.env.GF_SECURITY_ADMIN_PASSWORD;
+
+            console.log('Connecting to Grafana at:', grafanaUrl);
 
             // Create alert payload with detailed test information
             const alertPayload = {
@@ -35,16 +36,24 @@ class GrafanaUtils {
                     : 'All tests passed successfully'
             };
 
-            console.log('Connecting to Grafana at:', grafanaUrl);
+            // Configure headers based on available authentication method
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (grafanaApiKey) {
+                headers['Authorization'] = `Bearer ${grafanaApiKey}`;
+            } else {
+                // Use basic auth as fallback
+                const auth = Buffer.from(`${grafanaUser}:${grafanaPassword}`).toString('base64');
+                headers['Authorization'] = `Basic ${auth}`;
+            }
 
             // Send metrics to Grafana using the correct API endpoint
             const response = await axios({
                 method: 'post',
                 url: `${grafanaUrl}/api/annotations`,
-                headers: {
-                    'Authorization': `Bearer ${grafanaApiKey}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: headers,
                 data: {
                     time: Date.now(),
                     tags: ['test-execution', metrics.failed > 0 ? 'test-failure' : 'test-success'],

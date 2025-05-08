@@ -5,7 +5,7 @@ const https = require('https');
 const http = require('http');
 
 // Use Docker service name when running in CI/Docker
-const GRAFANA_URL = 'http://localhost:3002';
+const GRAFANA_URL = 'http://grafana:3002';
 const GRAFANA_API_KEY = process.env.GRAFANA_API_KEY;
 // Use default credentials if API key not available
 const GRAFANA_USER = process.env.GF_SECURITY_ADMIN_USER;
