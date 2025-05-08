@@ -3,13 +3,13 @@ const axios = require('axios');
 class GrafanaUtils {
     static async triggerAlert(metrics) {
         try {
-            // Use Docker service name and internal port if running in Docker
+            // Use Docker service name when in CI environment
             const grafanaUrl = process.env.CI ? 'http://grafana:3000' : 'http://localhost:3002';
-            const grafanaApiKey = process.env.GRAFANA_API_KEY;
-
-            // For basic auth when API key is not available
-            const grafanaUser = process.env.GF_SECURITY_ADMIN_USER ;
-            const grafanaPassword = process.env.GF_SECURITY_ADMIN_PASSWORD;
+            
+            // Get authentication details from environment variables
+            // Use the same env var names as in docker-compose
+            const grafanaUser = process.env.GF_SECURITY_ADMIN_USER || 'admin';
+            const grafanaPassword = process.env.GF_SECURITY_ADMIN_PASSWORD || 'admin';
 
             console.log('Connecting to Grafana at:', grafanaUrl);
 
@@ -36,24 +36,17 @@ class GrafanaUtils {
                     : 'All tests passed successfully'
             };
 
-            // Configure headers based on available authentication method
-            const headers = {
-                'Content-Type': 'application/json'
-            };
+            // Create Basic Auth token from credentials
+            const auth = Buffer.from(`${grafanaUser}:${grafanaPassword}`).toString('base64');
             
-            if (grafanaApiKey) {
-                headers['Authorization'] = `Bearer ${grafanaApiKey}`;
-            } else {
-                // Use basic auth as fallback
-                const auth = Buffer.from(`${grafanaUser}:${grafanaPassword}`).toString('base64');
-                headers['Authorization'] = `Basic ${auth}`;
-            }
-
             // Send metrics to Grafana using the correct API endpoint
             const response = await axios({
                 method: 'post',
                 url: `${grafanaUrl}/api/annotations`,
-                headers: headers,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${auth}`
+                },
                 data: {
                     time: Date.now(),
                     tags: ['test-execution', metrics.failed > 0 ? 'test-failure' : 'test-success'],
