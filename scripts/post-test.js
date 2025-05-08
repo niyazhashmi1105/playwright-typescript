@@ -26,26 +26,71 @@ async function postTestMonitoring() {
             return;
         }
 
-        const files = fs.readdirSync(resultsDir)
-            .filter(file => file.endsWith('results.json'))
-            .map(file => ({
-                name: file,
-                time: fs.statSync(path.join(resultsDir, file)).mtime.getTime()
-            }))
-            .sort((a, b) => b.time - a.time);
+        // Look specifically for the consolidated test-results.json file first
+        const consolidatedResultsPath = path.join(resultsDir, 'test-results.json');
+        let testResults;
+        let results = [];
 
-        if (files.length === 0) {
-            console.error('No test result files found');
-            return;
+        if (fs.existsSync(consolidatedResultsPath)) {
+            console.log('Found consolidated test results file:', consolidatedResultsPath);
+            testResults = JSON.parse(fs.readFileSync(consolidatedResultsPath, 'utf8'));
+            
+            // Extract test data from the consolidated format
+            if (testResults.summary) {
+                // Process passed tests
+                if (testResults.summary.passed && Array.isArray(testResults.summary.passed)) {
+                    results = results.concat(testResults.summary.passed.map(test => ({
+                        title: test.title,
+                        browser: test.browser,
+                        status: 'passed'
+                    })));
+                }
+                
+                // Process failed tests
+                if (testResults.summary.failed && Array.isArray(testResults.summary.failed)) {
+                    results = results.concat(testResults.summary.failed.map(test => ({
+                        title: test.title,
+                        browser: test.browser,
+                        status: 'failed',
+                        error: { message: test.error || 'Unknown error' }
+                    })));
+                }
+                
+                // Process skipped tests
+                if (testResults.summary.skipped && Array.isArray(testResults.summary.skipped)) {
+                    results = results.concat(testResults.summary.skipped.map(test => ({
+                        title: test.title,
+                        browser: test.browser,
+                        status: 'skipped'
+                    })));
+                }
+            }
+        } else {
+            // Fall back to the original logic of searching for individual result files
+            const files = fs.readdirSync(resultsDir)
+                .filter(file => file.endsWith('results.json'))
+                .map(file => ({
+                    name: file,
+                    time: fs.statSync(path.join(resultsDir, file)).mtime.getTime()
+                }))
+                .sort((a, b) => b.time - a.time);
+
+            if (files.length === 0) {
+                console.error('No test result files found');
+                return;
+            }
+
+            console.log('Found test results file:', files[0].name);
+            testResults = JSON.parse(fs.readFileSync(path.join(resultsDir, files[0].name)));
+            
+            // Handle both single result and array of results
+            results = Array.isArray(testResults) ? testResults : [testResults];
         }
 
-        console.log('Found test results file:', files[1].name);
-
-        // Read and parse the test results file
-        const testResults = JSON.parse(fs.readFileSync(path.join(resultsDir, files[1].name)));
-        
-        // Handle both single result and array of results
-        const results = Array.isArray(testResults) ? testResults : [testResults];
+        if (results.length === 0) {
+            console.error('No test results data found in the files');
+            return;
+        }
         
         // Calculate metrics
         const metrics = {
