@@ -1,38 +1,71 @@
-<testsuites id="" name="" tests="15" failures="0" skipped="0" errors="0" time="20.396325">
-<testsuite name="end2end.spec.ts" timestamp="2025-05-01T03:44:04.806Z" hostname="chromium" tests="5" failures="0" skipped="0" time="8.813" errors="0">
-<testcase name="count the number of products" classname="end2end.spec.ts" time="2.021">
+<testsuites id="" name="" tests="5" failures="1" skipped="0" errors="0" time="6.079938">
+<testsuite name="end2end.spec.ts" timestamp="2025-05-04T02:15:21.159Z" hostname="chromium" tests="5" failures="1" skipped="0" time="4.367" errors="0">
+<testcase name="count the number of products" classname="end2end.spec.ts" time="1.147">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/end2end-count-the-number-of-products-chromium/video.webm]]
+]]>
+</system-out>
 </testcase>
-<testcase name="check the product available or not" classname="end2end.spec.ts" time="2.03">
+<testcase name="check the product available or not" classname="end2end.spec.ts" time="0.668">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/end2end-check-the-product-available-or-not-chromium/video.webm]]
+]]>
+</system-out>
 </testcase>
-<testcase name="Add the product into the cart and assert if it is added or not" classname="end2end.spec.ts" time="2.142">
+<testcase name="Add the product into the cart and assert if it is added or not" classname="end2end.spec.ts" time="0.726">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/end2end-Add-the-product-in-6ab95-ssert-if-it-is-added-or-not-chromium/video.webm]]
+]]>
+</system-out>
 </testcase>
-<testcase name="Check the first and last product before applying filter and after applying the filter" classname="end2end.spec.ts" time="1.204">
+<testcase name="Check the first and last product before applying filter and after applying the filter" classname="end2end.spec.ts" time="0.836">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/end2end-Check-the-first-an-db2da-d-after-applying-the-filter-chromium/video.webm]]
+]]>
+</system-out>
 </testcase>
-<testcase name="Add to products into the cart" classname="end2end.spec.ts" time="1.416">
-</testcase>
-</testsuite>
-<testsuite name="end2end.spec.ts" timestamp="2025-05-01T03:44:04.806Z" hostname="firefox" tests="5" failures="0" skipped="0" time="15.442" errors="0">
-<testcase name="count the number of products" classname="end2end.spec.ts" time="3.28">
-</testcase>
-<testcase name="check the product available or not" classname="end2end.spec.ts" time="4.222">
-</testcase>
-<testcase name="Add the product into the cart and assert if it is added or not" classname="end2end.spec.ts" time="3.429">
-</testcase>
-<testcase name="Check the first and last product before applying filter and after applying the filter" classname="end2end.spec.ts" time="1.993">
-</testcase>
-<testcase name="Add to products into the cart" classname="end2end.spec.ts" time="2.518">
-</testcase>
-</testsuite>
-<testsuite name="end2end.spec.ts" timestamp="2025-05-01T03:44:04.806Z" hostname="webkit" tests="5" failures="0" skipped="0" time="11.527" errors="0">
-<testcase name="count the number of products" classname="end2end.spec.ts" time="2.598">
-</testcase>
-<testcase name="check the product available or not" classname="end2end.spec.ts" time="2.673">
-</testcase>
-<testcase name="Add the product into the cart and assert if it is added or not" classname="end2end.spec.ts" time="2.828">
-</testcase>
-<testcase name="Check the first and last product before applying filter and after applying the filter" classname="end2end.spec.ts" time="1.533">
-</testcase>
-<testcase name="Add to products into the cart" classname="end2end.spec.ts" time="1.895">
+<testcase name="Add to products into the cart" classname="end2end.spec.ts" time="0.99">
+<failure message="end2end.spec.ts:74:5 Add to products into the cart" type="FAILURE">
+<![CDATA[  [chromium] › end2end.spec.ts:74:5 › Add to products into the cart › Add multiple products to cart 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      117 |         await cartPage.click('#back-to-products');
+      118 |         const test = await cartPage.isVisibleText('.title');
+    > 119 |         expect(test).toBe(false);
+          |                      ^
+      120 |     });
+      121 | });
+        at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:119:22
+        at /Users/mdniyazhashmi/playwright-typescript/tests/end2end.spec.ts:75:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/end2end-Add-to-products-into-the-cart-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/end2end-Add-to-products-into-the-cart-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/end2end-Add-to-products-into-the-cart-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/end2end-Add-to-products-into-the-cart-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/end2end-Add-to-products-into-the-cart-chromium/video.webm]]
+
+[[ATTACHMENT|test-results/end2end-Add-to-products-into-the-cart-chromium/error-context.md]]
+]]>
+</system-out>
 </testcase>
 </testsuite>
 </testsuites>

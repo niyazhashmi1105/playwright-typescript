@@ -8,8 +8,8 @@ if (!process.env.CI) {
   dotenv.config({ path: path.resolve(__dirname, '.env') });
 }
 
-// Set default metrics port if not specified
-process.env.METRICS_PORT = process.env.METRICS_PORT || '9323';
+// Set default metrics port for local development
+process.env.METRICS_PORT = process.env.METRICS_PORT || '9324';
 
 // Get environment variables with fallbacks
 const getEnvVariable = (key: string): string => {

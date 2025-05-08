@@ -27,7 +27,7 @@ async function postTestMonitoring() {
         }
 
         const files = fs.readdirSync(resultsDir)
-            .filter(file => file.endsWith('.json'))
+            .filter(file => file.endsWith('results.json'))
             .map(file => ({
                 name: file,
                 time: fs.statSync(path.join(resultsDir, file)).mtime.getTime()
@@ -39,10 +39,10 @@ async function postTestMonitoring() {
             return;
         }
 
-        console.log('Found test results file:', files[0].name);
+        console.log('Found test results file:', files[1].name);
 
         // Read and parse the test results file
-        const testResults = JSON.parse(fs.readFileSync(path.join(resultsDir, files[0].name)));
+        const testResults = JSON.parse(fs.readFileSync(path.join(resultsDir, files[1].name)));
         
         // Handle both single result and array of results
         const results = Array.isArray(testResults) ? testResults : [testResults];
