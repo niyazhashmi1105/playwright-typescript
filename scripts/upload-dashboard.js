@@ -6,10 +6,9 @@ const http = require('http');
 
 // Use Docker service name when running in CI/Docker
 const GRAFANA_URL = process.env.CI ? 'http://grafana:3000' : 'http://localhost:3002';
-// Use environment variables with fallbacks for authentication
-const GRAFANA_API_KEY = process.env.GRAFANA_API_KEY;
-const GRAFANA_USER = process.env.GF_SECURITY_ADMIN_USER || 'admin';
-const GRAFANA_PASSWORD = process.env.GF_SECURITY_ADMIN_PASSWORD || 'admin';
+// Hardcode credentials for reliability
+const GRAFANA_USER = 'admin';
+const GRAFANA_PASSWORD = 'admin';
 
 async function uploadDashboard() {
     const dashboardPath = path.join(__dirname, '..', 'grafana', 'dashboards', 'consolidated-dashboard.json');
@@ -40,16 +39,10 @@ async function uploadDashboard() {
             }
         };
 
-        // Use API key if available, otherwise use basic auth
-        if (GRAFANA_API_KEY) {
-            options.headers['Authorization'] = `Bearer ${GRAFANA_API_KEY}`;
-            console.log('Using API key authentication for Grafana');
-        } else {
-            // Use basic auth with admin credentials
-            const auth = Buffer.from(`${GRAFANA_USER}:${GRAFANA_PASSWORD}`).toString('base64');
-            options.headers['Authorization'] = `Basic ${auth}`;
-            console.log('Using basic auth authentication for Grafana');
-        }
+        // Use basic auth with hardcoded admin credentials
+        const auth = Buffer.from(`${GRAFANA_USER}:${GRAFANA_PASSWORD}`).toString('base64');
+        options.headers['Authorization'] = `Basic ${auth}`;
+        console.log('Using basic auth authentication for Grafana');
 
         return new Promise((resolve, reject) => {
             const reqLib = GRAFANA_URL.startsWith('https') ? https : http;
