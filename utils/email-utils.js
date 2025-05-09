@@ -26,15 +26,35 @@ class EmailUtils {
         }
 
         try {
+            // Parse SMTP port and determine if connection should be secure
+            const port = parseInt(process.env.SMTP_PORT || '587');
+            const isSecure = port === 465; // Port 465 is for implicit TLS
+            
+            console.log(`Creating email transport with host: ${process.env.SMTP_HOST}, port: ${port}, secure: ${isSecure}`);
+            
             const transporter = nodemailer.createTransport({
                 host: process.env.SMTP_HOST,
-                port: parseInt(process.env.SMTP_PORT || '587'),
-                secure: process.env.SMTP_TLS === 'true',
+                port: port,
+                secure: isSecure, // true for port 465, false for other ports
                 auth: {
                     user: process.env.SMTP_USER,
                     pass: process.env.SMTP_PASSWORD
+                },
+                tls: {
+                    // Do not fail on invalid certificates
+                    rejectUnauthorized: false,
+                    // Force specific TLS version if needed
+                    minVersion: 'TLSv1.2'
                 }
             });
+
+            // Verify connection configuration
+            await transporter.verify().catch(err => {
+                console.error('SMTP connection verification failed:', err.message);
+                throw err;
+            });
+            
+            console.log('SMTP connection verified successfully');
 
             const attachments = [];
             const reportPath = path.join(process.cwd(), 'playwright-report/index.html');
@@ -60,6 +80,9 @@ class EmailUtils {
             console.log('Test report email sent successfully');
         } catch (error) {
             console.error('Failed to send email:', error.message);
+            if (error.code) {
+                console.error('Error code:', error.code);
+            }
             // Don't throw error to avoid failing the test run
         }
     }
