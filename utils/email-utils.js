@@ -4,49 +4,26 @@ const path = require('path');
 
 class EmailUtils {
     static async sendTestReport(metrics) {
-        // Validate required SMTP configuration
-        const requiredEnvVars = {
-            SMTP_HOST: process.env.SMTP_HOST,
-            SMTP_PORT: process.env.SMTP_PORT,
-            SMTP_USER: process.env.SMTP_USER,
-            SMTP_PASSWORD: process.env.SMTP_PASSWORD,
-            SMTP_FROM: process.env.SMTP_FROM,
-            SMTP_TO: process.env.SMTP_TO
-        };
-
-        // Check for missing configuration
-        const missingVars = Object.entries(requiredEnvVars)
-            .filter(([key, value]) => !value)
-            .map(([key]) => key);
-
-        if (missingVars.length > 0) {
-            console.error(`Missing required SMTP configuration: ${missingVars.join(', ')}`);
-            console.error('Please set these variables in your .env file');
-            return;
-        }
-
         try {
-            // Parse SMTP port and determine if connection should be secure
-            const port = parseInt(process.env.SMTP_PORT || '587');
-            const isSecure = port === 465; // Port 465 is for implicit TLS
-            
-            console.log(`Creating email transport with host: ${process.env.SMTP_HOST}, port: ${port}, secure: ${isSecure}`);
-            
-            const transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: port,
-                secure: isSecure, // true for port 465, false for other ports
+            // Use hardcoded Gmail configuration - aligned with alertmanager.yml
+            // This ensures emails are consistently sent with the same configuration
+            const SMTP_CONFIG = {
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
                 auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASSWORD
+                    user: 'hashmimdniyaz@gmail.com',
+                    pass: process.env.SMTP_PASSWORD || 'mtqobzrwneayturw' // Use env var if available, otherwise use value from alertmanager.yml
                 },
                 tls: {
-                    // Do not fail on invalid certificates
                     rejectUnauthorized: false,
-                    // Force specific TLS version if needed
                     minVersion: 'TLSv1.2'
                 }
-            });
+            };
+            
+            console.log(`Creating email transport with host: ${SMTP_CONFIG.host}, port: ${SMTP_CONFIG.port}`);
+            
+            const transporter = nodemailer.createTransport(SMTP_CONFIG);
 
             // Verify connection configuration
             await transporter.verify().catch(err => {
@@ -68,8 +45,8 @@ class EmailUtils {
             }
 
             await transporter.sendMail({
-                from: `"${process.env.SMTP_FROM_NAME || 'Test Reporter'}" <${process.env.SMTP_FROM}>`,
-                to: process.env.SMTP_TO,
+                from: '"Test Reporter" <hashmimdniyaz@gmail.com>',
+                to: 'hashmimdniyaz@gmail.com', // Using the same email address from alertmanager.yml
                 subject: `Test Report ${metrics.failed > 0 ? '❌ Failed' : '✅ Passed'} (${(metrics.passed / metrics.total * 100).toFixed(2)}% Pass Rate)`,
                 html: this.generateEmailContent(metrics),
                 attachments: attachments
