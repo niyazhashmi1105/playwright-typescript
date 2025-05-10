@@ -5,27 +5,22 @@ const uploadDashboard = require('./upload-dashboard');
 const { EmailUtils } = require('../utils/email-utils');
 const { GrafanaUtils } = require('../utils/grafana-utils');
 
-// Add lock file mechanism to prevent duplicate runs
-const LOCK_FILE = path.join(process.cwd(), '.notification-lock');
+// Use a process-wide flag to prevent duplicate notifications
+// This is more reliable than file locks which might have permission issues
+let notificationSent = false;
+
+// Create a unique ID for this test run to track in logs
+const RUN_ID = new Date().toISOString().replace(/[:.]/g, '-') + '-' + Math.random().toString(36).substring(2, 8);
 
 async function postTestMonitoring() {
     try {
-        console.log('Starting post-test monitoring...');
+        console.log(`Starting post-test monitoring... (Run ID: ${RUN_ID})`);
         console.log('Environment:', process.env.CI ? 'CI/Docker' : 'Local');
         
-        // Check if we've already sent notifications recently (within 5 minutes)
-        if (fs.existsSync(LOCK_FILE)) {
-            const lockData = JSON.parse(fs.readFileSync(LOCK_FILE, 'utf8'));
-            const lockTime = new Date(lockData.timestamp);
-            const now = new Date();
-            const timeDiff = (now - lockTime) / 1000 / 60; // minutes
-            
-            if (timeDiff < 5) {
-                console.log(`Notifications were already sent ${timeDiff.toFixed(2)} minutes ago. Skipping to prevent duplicates.`);
-                return;
-            } else {
-                console.log('Previous notification lock expired, proceeding with new notifications');
-            }
+        // Check if notifications were already sent in this process
+        if (notificationSent) {
+            console.log(`Notifications already sent in this process run. Skipping duplicate notifications. (Run ID: ${RUN_ID})`);
+            return;
         }
         
         // Upload dashboard if it doesn't exist
@@ -140,20 +135,20 @@ async function postTestMonitoring() {
                 }))
         };
 
-        console.log('Test Execution Metrics:', JSON.stringify(metrics, null, 2));
+        console.log(`Test Execution Metrics for run ${RUN_ID}:`, JSON.stringify(metrics, null, 2));
 
-        // Create a lock file to prevent duplicate notifications
-        fs.writeFileSync(LOCK_FILE, JSON.stringify({
-            timestamp: new Date().toISOString(),
-            runId: Math.random().toString(36).substring(2, 15)
-        }));
+        // Set the flag to prevent duplicate notifications
+        notificationSent = true;
+        console.log(`Setting notification flag to prevent duplicates. (Run ID: ${RUN_ID})`);
 
-        // Send notifications in parallel, but prioritize direct email over Grafana
-        await EmailUtils.sendTestReport(metrics).catch(error => {
+        // Send email notification once and wait for it to complete
+        console.log(`Sending email notification... (Run ID: ${RUN_ID})`);
+        await EmailUtils.sendTestReport(metrics, RUN_ID).catch(error => {
             console.error('Failed to send email notification:', error.message);
         });
         
         // After the email is sent successfully, update Grafana
+        console.log(`Sending alert to Grafana... (Run ID: ${RUN_ID})`);
         await GrafanaUtils.triggerAlert(metrics).catch(error => {
             console.error('Failed to trigger Grafana alert:', error.message);
             if (error.code === 'ECONNREFUSED') {
@@ -161,12 +156,17 @@ async function postTestMonitoring() {
             }
         });
 
-        console.log('Post-test monitoring completed');
+        console.log(`Post-test monitoring completed. (Run ID: ${RUN_ID})`);
     } catch (error) {
-        console.error('Error in post-test monitoring:', error);
+        console.error(`Error in post-test monitoring (Run ID: ${RUN_ID}):`, error);
         // Don't exit with error code to prevent build failure
         console.log('Continuing despite post-test monitoring error');
     }
 }
 
-postTestMonitoring();
+// Only run the monitoring once per module load
+if (require.main === module) {
+    postTestMonitoring();
+}
+
+module.exports = { postTestMonitoring };

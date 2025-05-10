@@ -2,9 +2,22 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 
+// Track which emails have already been sent to prevent duplicates
+const sentEmails = new Set();
+
 class EmailUtils {
-    static async sendTestReport(metrics) {
+    static async sendTestReport(metrics, runId = 'default') {
+        // Check if we've already sent an email for this test run
+        const emailKey = `${runId}-${metrics.total}-${metrics.passed}-${metrics.failed}`;
+        if (sentEmails.has(emailKey)) {
+            console.log(`Email already sent for this test run (${runId}). Skipping duplicate email.`);
+            return;
+        }
+
         try {
+            // Add this email to the sent collection before sending
+            sentEmails.add(emailKey);
+            
             // Use hardcoded Gmail configuration - aligned with alertmanager.yml
             // This ensures emails are consistently sent with the same configuration
             const SMTP_CONFIG = {
@@ -21,7 +34,7 @@ class EmailUtils {
                 }
             };
             
-            console.log(`Creating email transport with host: ${SMTP_CONFIG.host}, port: ${SMTP_CONFIG.port}`);
+            console.log(`Creating email transport with host: ${SMTP_CONFIG.host}, port: ${SMTP_CONFIG.port} (Run ID: ${runId})`);
             
             const transporter = nodemailer.createTransport(SMTP_CONFIG);
 
@@ -44,27 +57,36 @@ class EmailUtils {
                 });
             }
 
+            // Add a messageId with runId to prevent Gmail from grouping messages
+            const messageId = `<test-report-${runId}@playwright-tests.local>`;
+
             await transporter.sendMail({
                 from: '"Test Reporter" <hashmimdniyaz@gmail.com>',
                 to: 'hashmimdniyaz@gmail.com', // Using the same email address from alertmanager.yml
                 subject: `Test Report ${metrics.failed > 0 ? '❌ Failed' : '✅ Passed'} (${(metrics.passed / metrics.total * 100).toFixed(2)}% Pass Rate)`,
-                html: this.generateEmailContent(metrics),
-                attachments: attachments
+                html: this.generateEmailContent(metrics, runId),
+                attachments: attachments,
+                messageId: messageId,
+                headers: {
+                    'X-Run-ID': runId,
+                    'X-Test-Results': `${metrics.passed}/${metrics.total} passed`
+                }
             });
 
             // Close the connection pool
             transporter.close();
-            console.log('Test report email sent successfully');
+            console.log(`Test report email sent successfully (Run ID: ${runId})`);
         } catch (error) {
-            console.error('Failed to send email:', error.message);
+            console.error(`Failed to send email (Run ID: ${runId}):`, error.message);
             if (error.code) {
                 console.error('Error code:', error.code);
             }
-            // Don't throw error to avoid failing the test run
+            // Remove from sent set if failed so we can try again
+            sentEmails.delete(emailKey);
         }
     }
 
-    static generateEmailContent(metrics) {
+    static generateEmailContent(metrics, runId) {
         const passRate = (metrics.passed / metrics.total * 100).toFixed(2);
         const hasFailures = metrics.failed > 0;
         
@@ -178,6 +200,7 @@ class EmailUtils {
             <body>
                 <div class="container">
                     <h2>Playwright Test Execution Report ${hasFailures ? '❌' : '✅'}</h2>
+                    <p style="color: #666; font-size: 12px;">Run ID: ${runId}</p>
 
                     <div class="section">
                         <h3>Summary</h3>
