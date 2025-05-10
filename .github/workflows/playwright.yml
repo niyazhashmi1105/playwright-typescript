@@ -224,13 +224,29 @@ jobs:
         if-no-files-found: warn
 
     - name: Upload Allure Report to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@v4
       if: always() && github.ref == 'refs/heads/main' && hashFiles('allure-report/**/*') != ''
-      with:
-        folder: allure-report
-        branch: gh-pages
-        clean: true
-        target-folder: allure-report
+      run: |
+        # Configure Git
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
+        # Create a fresh deployment branch
+        git checkout --orphan gh-pages-temp
+        
+        # Clear working directory except for allure-report
+        find . -mindepth 1 -maxdepth 1 -not -name 'allure-report' -not -name '.git' -exec rm -rf {} \;
+        
+        # Move allure-report content to root
+        cp -r allure-report/* .
+        rm -rf allure-report
+        
+        # Add files and commit
+        git add .
+        git commit -m "Deploy Allure report to GitHub Pages"
+        
+        # Force push to gh-pages
+        git push origin gh-pages-temp:gh-pages --force
+      timeout-minutes: 5
 
     - name: Check test results
       if: steps.run-tests.outcome == 'failure'
