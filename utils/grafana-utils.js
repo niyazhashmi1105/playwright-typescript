@@ -81,10 +81,10 @@ class GrafanaUtils {
                 }];
                 
                 try {
-                    // Send alert directly to Alertmanager
+                    // Send alert directly to Alertmanager using v2 API endpoint
                     const alertResponse = await axios({
                         method: 'post',
-                        url: `${alertmanagerUrl}/api/v1/alerts`,
+                        url: `${alertmanagerUrl}/api/v2/alerts`, // Updated to v2 API from v1
                         headers: {
                             'Content-Type': 'application/json'
                         },
