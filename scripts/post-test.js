@@ -5,10 +5,28 @@ const uploadDashboard = require('./upload-dashboard');
 const { EmailUtils } = require('../utils/email-utils');
 const { GrafanaUtils } = require('../utils/grafana-utils');
 
+// Add lock file mechanism to prevent duplicate runs
+const LOCK_FILE = path.join(process.cwd(), '.notification-lock');
+
 async function postTestMonitoring() {
     try {
         console.log('Starting post-test monitoring...');
         console.log('Environment:', process.env.CI ? 'CI/Docker' : 'Local');
+        
+        // Check if we've already sent notifications recently (within 5 minutes)
+        if (fs.existsSync(LOCK_FILE)) {
+            const lockData = JSON.parse(fs.readFileSync(LOCK_FILE, 'utf8'));
+            const lockTime = new Date(lockData.timestamp);
+            const now = new Date();
+            const timeDiff = (now - lockTime) / 1000 / 60; // minutes
+            
+            if (timeDiff < 5) {
+                console.log(`Notifications were already sent ${timeDiff.toFixed(2)} minutes ago. Skipping to prevent duplicates.`);
+                return;
+            } else {
+                console.log('Previous notification lock expired, proceeding with new notifications');
+            }
+        }
         
         // Upload dashboard if it doesn't exist
         console.log('Uploading dashboard...');
@@ -124,23 +142,25 @@ async function postTestMonitoring() {
 
         console.log('Test Execution Metrics:', JSON.stringify(metrics, null, 2));
 
-        // Send notifications in parallel
-        const notificationPromises = [
-            // Trigger Grafana alert
-            GrafanaUtils.triggerAlert(metrics).catch(error => {
-                console.error('Failed to trigger Grafana alert:', error.message);
-                if (error.code === 'ECONNREFUSED') {
-                    console.error('Connection refused. If running in Docker, ensure Grafana service is accessible via Docker network');
-                }
-            }),
-            // Send email notification
-            EmailUtils.sendTestReport(metrics).catch(error => {
-                console.error('Failed to send email notification:', error.message);
-            })
-        ];
+        // Create a lock file to prevent duplicate notifications
+        fs.writeFileSync(LOCK_FILE, JSON.stringify({
+            timestamp: new Date().toISOString(),
+            runId: Math.random().toString(36).substring(2, 15)
+        }));
 
-        // Wait for all notifications but don't fail if they error
-        await Promise.allSettled(notificationPromises);
+        // Send notifications in parallel, but prioritize direct email over Grafana
+        await EmailUtils.sendTestReport(metrics).catch(error => {
+            console.error('Failed to send email notification:', error.message);
+        });
+        
+        // After the email is sent successfully, update Grafana
+        await GrafanaUtils.triggerAlert(metrics).catch(error => {
+            console.error('Failed to trigger Grafana alert:', error.message);
+            if (error.code === 'ECONNREFUSED') {
+                console.error('Connection refused. If running in Docker, ensure Grafana service is accessible via Docker network');
+            }
+        });
+
         console.log('Post-test monitoring completed');
     } catch (error) {
         console.error('Error in post-test monitoring:', error);
