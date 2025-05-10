@@ -53,7 +53,7 @@ export default defineConfig({
     ['junit', { outputFile: 'results.xml' }],
     ['allure-playwright'],
     ['json', { outputFile: 'test-results/test-results.json' }],
-    //['./utils/email-reporter.ts'],
+    ['./utils/email-reporter.ts'],
     ['./utils/prometheus-reporter.ts']
   ],
   globalSetup: './global-setup',
@@ -61,7 +61,7 @@ export default defineConfig({
   use: {
     trace: 'off', // No trace since we're not retrying
     screenshot: 'only-on-failure',
-    video: 'on', // Changed from on-first-retry to capture video for all tests
+    video: 'off', 
   },
   projects: [
     {
