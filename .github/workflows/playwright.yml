@@ -27,7 +27,7 @@ jobs:
       ALERTMANAGER_EMAIL_PASSWORD: ${{ secrets.ALERTMANAGER_EMAIL_PASSWORD }}
       GRAFANA_API_KEY: ${{ secrets.GRAFANA_API_KEY }}
       SMTP_FROM_NAME: "Playwright Test Monitor"
-      PLAYWRIGHT_VERSION: 1.40.0
+      PLAYWRIGHT_VERSION: 1.52.0
 
     steps:
     - uses: actions/checkout@v4
@@ -199,7 +199,11 @@ jobs:
     - name: Generate Allure Report
       if: always()
       run: |
-        npm run allure:generate
+        # Install allure command line tool
+        npm install -g allure-commandline
+        
+        # Generate the report from existing allure-results
+        allure generate allure-results --clean -o allure-report
       timeout-minutes: 5
       
     - name: Check Prometheus targets
@@ -221,7 +225,7 @@ jobs:
 
     - name: Upload Allure Report to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4
-      if: always() && github.ref == 'refs/heads/main'
+      if: always() && github.ref == 'refs/heads/main' && hashFiles('allure-report/**/*') != ''
       with:
         folder: allure-report
         branch: gh-pages
