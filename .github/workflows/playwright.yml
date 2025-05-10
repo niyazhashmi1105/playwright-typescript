@@ -27,9 +27,12 @@ jobs:
       ALERTMANAGER_EMAIL_PASSWORD: ${{ secrets.ALERTMANAGER_EMAIL_PASSWORD }}
       GRAFANA_API_KEY: ${{ secrets.GRAFANA_API_KEY }}
       SMTP_FROM_NAME: "Playwright Test Monitor"
+      PLAYWRIGHT_VERSION: 1.40.0
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Create Docker network
       run: docker network create monitoring-network
@@ -71,7 +74,7 @@ jobs:
           -e "GF_SMTP_PASSWORD=${{ secrets.GF_SMTP_PASSWORD }}" \
           -e "GF_SMTP_FROM_ADDRESS=${{ secrets.SMTP_FROM }}" \
           -e "GF_SMTP_FROM_NAME=${{ env.SMTP_FROM_NAME }}" \
-          grafana/grafana
+          grafana/grafana:latest
       timeout-minutes: 5
 
     - name: Setup AlertManager
@@ -87,7 +90,7 @@ jobs:
           -e SMTP_TO=${{ secrets.SMTP_TO }} \
           -e ALERTMANAGER_EMAIL_PASSWORD=${{ secrets.ALERTMANAGER_EMAIL_PASSWORD }} \
           -v ${{ github.workspace }}/alertmanager:/etc/alertmanager \
-          prom/alertmanager \
+          prom/alertmanager:latest \
           --config.file=/etc/alertmanager/alertmanager.yml
       timeout-minutes: 5
 
@@ -137,55 +140,67 @@ jobs:
         node-version: lts/*
         cache: 'npm'
     
+    - name: Get npm cache directory
+      id: npm-cache-dir
+      shell: bash
+      run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+      
+    - name: Setup npm cache
+      uses: actions/cache@v3
+      id: npm-cache
+      with:
+        path: ${{ steps.npm-cache-dir.outputs.dir }}
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    
+    - name: Setup Playwright cache
+      uses: actions/cache@v3
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+    
     - name: Install dependencies
       run: npm ci
       timeout-minutes: 5
       
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
       timeout-minutes: 10
       
     - name: Run Playwright tests with metrics and monitoring
       id: run-tests
       continue-on-error: true
       run: |
-        # Start the container and keep it running
-        docker run -d \
-          --name test-runner \
-          --network monitoring-network \
-          -v ${{ github.workspace }}:/app \
-          -w /app \
-          -e METRICS_PORT=9323 \
-          -e GRAFANA_API_KEY=${{ secrets.GRAFANA_API_KEY }} \
-          -e GRAFANA_URL=${{ env.GRAFANA_URL }} \
-          -e PLAYWRIGHT_METRICS=${{ env.PLAYWRIGHT_METRICS }} \
-          -e SMTP_HOST=${{ secrets.SMTP_HOST }} \
-          -e SMTP_PORT=${{ secrets.SMTP_PORT }} \
-          -e SMTP_USER=${{ secrets.SMTP_USER }} \
-          -e SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }} \
-          -e SMTP_FROM=${{ secrets.SMTP_FROM }} \
-          -e SMTP_TO=${{ secrets.SMTP_TO }} \
-          -e SMTP_FROM_NAME="Playwright Test Monitor" \
-          -e GF_SECURITY_ADMIN_USER=${{ secrets.GF_SECURITY_ADMIN_USER }} \
-          -e GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GF_SECURITY_ADMIN_PASSWORD }} \
-          -e GF_SMTP_PASSWORD=${{ secrets.GF_SMTP_PASSWORD }} \
-          -e ALERTMANAGER_EMAIL_PASSWORD=${{ secrets.ALERTMANAGER_EMAIL_PASSWORD }} \
-          -e CI=1 \
-          -p 9323:9323 \
-          node:lts \
-          tail -f /dev/null
-
-        # Run tests and post-test tasks
-        docker exec test-runner npm install
-        docker exec test-runner npx playwright install --with-deps
-        docker exec test-runner npm run all:headless
-        # docker exec test-runner npm run post:test
-        # docker exec test-runner npm run upload:dashboard
+        # Set up environment variables for Playwright
+        export METRICS_PORT=9323
+        export GRAFANA_API_KEY=${{ secrets.GRAFANA_API_KEY }}
+        export GRAFANA_URL=${{ env.GRAFANA_URL }}
+        export PLAYWRIGHT_METRICS=${{ env.PLAYWRIGHT_METRICS }}
+        export SMTP_HOST=${{ secrets.SMTP_HOST }}
+        export SMTP_PORT=${{ secrets.SMTP_PORT }}
+        export SMTP_USER=${{ secrets.SMTP_USER }}
+        export SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+        export SMTP_FROM=${{ secrets.SMTP_FROM }}
+        export SMTP_TO=${{ secrets.SMTP_TO }}
+        export SMTP_FROM_NAME="Playwright Test Monitor"
+        export GF_SECURITY_ADMIN_USER=${{ secrets.GF_SECURITY_ADMIN_USER }}
+        export GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}
+        export GF_SMTP_PASSWORD=${{ secrets.GF_SMTP_PASSWORD }}
+        export ALERTMANAGER_EMAIL_PASSWORD=${{ secrets.ALERTMANAGER_EMAIL_PASSWORD }}
+        export CI=1
         
-        # Stop the container
-        docker stop test-runner
-        docker rm test-runner
-      timeout-minutes: 10
+        # Run tests directly without using a separate container
+        npm run all:headless
+      timeout-minutes: 20
+      
+    - name: Generate Allure Report
+      if: always()
+      run: |
+        npm run allure:generate
+      timeout-minutes: 5
       
     - name: Check Prometheus targets
       if: always()
@@ -199,8 +214,19 @@ jobs:
         path: |
           playwright-report/
           test-results/
-        retention-days: 1
+          my-report/
+          allure-report/
+        retention-days: 5
         if-no-files-found: warn
+
+    - name: Upload Allure Report to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      if: always() && github.ref == 'refs/heads/main'
+      with:
+        folder: allure-report
+        branch: gh-pages
+        clean: true
+        target-folder: allure-report
 
     - name: Check test results
       if: steps.run-tests.outcome == 'failure'
