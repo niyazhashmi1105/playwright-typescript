@@ -269,7 +269,7 @@ jobs:
         with:
           path: all-artifacts
           pattern: playwright-report-shard-*
-          merge-multiple: true
+          merge-multiple: false  # Changed to false to preserve each shard's directory structure
       
       - name: Debug directory structure
         run: |
@@ -294,25 +294,53 @@ jobs:
           
           echo "Looking for test artifacts in all shards..."
           
-          # First look for playwright-report files
-          find all-artifacts -path "*/playwright-report/*" -type f -exec cp -v {} playwright-report-to-merge/ \;
+          # List all shard directories
+          echo "All shard directories:"
+          ls -la all-artifacts/
           
-          # Also copy any test-results JSON files which might contain test data
-          find all-artifacts -path "*/test-results/*.json" -type f -exec cp -v {} playwright-report-to-merge/ \;
+          # First look for playwright-report files, preserving shard information
+          for shard_dir in all-artifacts/playwright-report-shard-*; do
+            shard_num=$(basename "$shard_dir" | sed 's/playwright-report-shard-//')
+            echo "Processing shard: $shard_num"
+            
+            # Create a subdirectory for each shard to prevent filename conflicts
+            mkdir -p "playwright-report-to-merge/shard-$shard_num"
+            
+            # Copy playwright-report files from this shard
+            if [ -d "$shard_dir/playwright-report" ]; then
+              echo "Found playwright-report directory in shard $shard_num"
+              cp -rv "$shard_dir/playwright-report/"* "playwright-report-to-merge/shard-$shard_num/"
+            else
+              echo "No playwright-report directory in shard $shard_num"
+            fi
+            
+            # Copy test-results JSON files from this shard
+            if [ -d "$shard_dir/test-results" ]; then
+              echo "Found test-results directory in shard $shard_num"
+              find "$shard_dir/test-results" -name "*.json" -exec cp -v {} "playwright-report-to-merge/shard-$shard_num/" \;
+            else
+              echo "No test-results directory in shard $shard_num"
+            fi
+            
+            # Copy allure files from this shard
+            if [ -d "$shard_dir/allure-results" ]; then
+              cp -rv "$shard_dir/allure-results/"* merged-allure-results/
+            fi
+            
+            if [ -d "$shard_dir/allure-report" ]; then
+              cp -rv "$shard_dir/allure-report/"* merged-allure-results/
+            fi
+          done
           
           # If no files were copied, create an empty index.html to prevent the merge error
-          if [ ! "$(ls -A playwright-report-to-merge)" ]; then
+          if [ ! "$(find playwright-report-to-merge -mindepth 1 -type f | head -n1)" ]; then
             echo "WARNING: No report files found in any shard's artifacts!"
             echo "<html><body><p>No test results found</p></body></html>" > playwright-report-to-merge/index.html
             echo "Created placeholder file because no report files were found"
           fi
           
-          # Copy all the allure-related files to merged-allure-results directory
-          find all-artifacts -path "*/allure-results/*" -type f -exec cp -v {} merged-allure-results/ \;
-          find all-artifacts -path "*/allure-report/*" -type f -exec cp -v {} merged-allure-results/ \;
-          
           echo "Contents of prepared directory for merging:"
-          ls -la playwright-report-to-merge/
+          find playwright-report-to-merge -type f | sort
       
       - name: Merge reports
         run: |
@@ -331,18 +359,88 @@ jobs:
           echo "Found $REPORT_FILES_COUNT files in playwright-report-to-merge"
           
           if [ $REPORT_FILES_COUNT -gt 0 ]; then
-            echo "Attempting to merge reports with Playwright merge-reports..."
+            echo "Creating JSON file lists for each shard for better merging"
             
-            # Try to merge the reports - redirect stderr to capture any errors
-            if npx playwright merge-reports --config=playwright.config.ts --reporter=html --output=playwright-report playwright-report-to-merge 2>merge-error.log; then
+            # Create temporary directory for proper merging
+            mkdir -p temp-merge-dir
+            
+            # First collect all JSON files by shard
+            for shard_dir in playwright-report-to-merge/shard-*; do
+              if [ -d "$shard_dir" ]; then
+                shard_num=$(basename "$shard_dir" | sed 's/shard-//')
+                echo "Processing JSON files from shard $shard_num"
+                
+                # Find all report JSON files in this shard
+                json_files=$(find "$shard_dir" -name "*.json" -not -path "*/trace/*")
+                if [ ! -z "$json_files" ]; then
+                  # Create a consolidated JSON for this shard in the temp directory
+                  mkdir -p "temp-merge-dir/shard-$shard_num"
+                  cp $json_files "temp-merge-dir/shard-$shard_num/"
+                fi
+                
+                # Also copy any HTML files from this shard
+                find "$shard_dir" -name "*.html" -exec cp {} "temp-merge-dir/" \;
+              fi
+            done
+            
+            # Try to merge the reports using the reorganized files
+            echo "Attempting to merge with Playwright merge-reports..."
+            if npx playwright merge-reports --config=playwright.config.ts --reporter=html --output=playwright-report temp-merge-dir 2>merge-error.log; then
               echo "Report merge completed successfully"
             else
               echo "Report merge failed, checking error log:"
               cat merge-error.log
               
-              # Copy the files directly as a fallback
-              echo "Falling back to direct file copy..."
-              cp -r playwright-report-to-merge/* playwright-report/
+              # Copy the most complete report as a fallback
+              echo "Merging failed. Using fallback approach to combine reports..."
+              
+              # First check which shard's report has more content (likely more complete)
+              max_size=0
+              primary_shard=""
+              
+              for shard_dir in playwright-report-to-merge/shard-*; do
+                if [ -d "$shard_dir" ]; then
+                  dir_size=$(du -s "$shard_dir" | cut -f1)
+                  if [ "$dir_size" -gt "$max_size" ]; then
+                    max_size=$dir_size
+                    primary_shard=$shard_dir
+                  fi
+                fi
+              done
+              
+              if [ ! -z "$primary_shard" ]; then
+                echo "Using $primary_shard as the primary report"
+                cp -r "$primary_shard"/* playwright-report/
+                
+                # Create a combined index.html that references both reports
+                for shard_dir in playwright-report-to-merge/shard-*; do
+                  if [ "$shard_dir" != "$primary_shard" ] && [ -d "$shard_dir" ]; then
+                    shard_num=$(basename "$shard_dir" | sed 's/shard-//')
+                    echo "Adding links to report from shard $shard_num"
+                    
+                    # Create directory for this shard's report
+                    mkdir -p "playwright-report/shard-$shard_num"
+                    cp -r "$shard_dir"/* "playwright-report/shard-$shard_num/"
+                    
+                    # Update the main index.html to link to this shard's report
+                    if [ -f "playwright-report/index.html" ]; then
+                      echo "
+                        <div style='margin-top: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;'>
+                          <h3>Report from Shard $shard_num</h3>
+                          <a href='shard-$shard_num/index.html'>View Shard $shard_num Report</a>
+                        </div>" >> playwright-report/index-links.html
+                        
+                      # Insert the links before the closing body tag
+                      sed -i.bak '/<\/body>/i\\n<!-- Shard Links -->\n<div class="shard-links">\n<h2>Additional Shard Reports</h2>\n'$(cat playwright-report/index-links.html)'\n</div>' playwright-report/index.html
+                      rm playwright-report/index-links.html
+                      rm playwright-report/index.html.bak
+                    fi
+                  fi
+                done
+              else
+                echo "No primary report found, copying all report files"
+                cp -r playwright-report-to-merge/* playwright-report/
+              fi
             fi
             
             # Verify that the report was created
@@ -354,24 +452,6 @@ jobs:
             # Create a simple report if no real reports exist
             echo "<html><body><h1>Test Report</h1><p>No test results were found to merge. Please check your test configuration and execution.</p></body></html>" > playwright-report/index.html
             echo "Created a simple report because no report files were found"
-          fi
-          
-          # Generate Allure report if results exist
-          if [ "$(find merged-allure-results -type f | wc -l)" -gt 0 ]; then
-            echo "Found Allure result files, generating report..."
-            allure generate merged-allure-results --clean -o merged-allure-report
-            
-            # Verify report was generated correctly
-            if [ ! -f "merged-allure-report/index.html" ]; then
-              echo "Allure report generation failed to create index.html, creating fallback"
-              mkdir -p merged-allure-report
-              echo "<html><body><h1>Allure Report</h1><p>Result files were found but report generation failed</p></body></html>" > merged-allure-report/index.html
-            fi
-          else
-            echo "No Allure report results found for merging"
-            # Create a basic directory to prevent errors
-            mkdir -p merged-allure-report
-            echo "<html><body><h1>No Allure Reports</h1><p>No test results were found to generate an Allure report.</p></body></html>" > merged-allure-report/index.html
           fi
       
       - uses: actions/upload-artifact@v4
