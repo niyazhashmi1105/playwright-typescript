@@ -270,20 +270,44 @@ jobs:
           pattern: playwright-report-shard-*
           merge-multiple: true
       
+      - name: List directory structure for debugging
+        run: |
+          echo "Directory structure of all-artifacts:"
+          ls -la all-artifacts
+          echo "Checking for playwright-report in each shard:"
+          find all-artifacts -type d -name "playwright-report" | xargs -I {} ls -la {}
+          echo "Checking for test-results in each shard:"
+          find all-artifacts -type d -name "test-results" | xargs -I {} ls -la {}
+      
+      - name: Prepare directories for report merging
+        run: |
+          # Create directories to hold report files
+          mkdir -p playwright-report-to-merge
+          mkdir -p merged-allure-results
+          
+          # Copy all the playwright-report contents from shards to a single location
+          find all-artifacts -type f -path "*/playwright-report/*" -exec cp {} playwright-report-to-merge/ \;
+          
+          # Copy all the allure-related JSON files to merged-allure-results directory
+          find all-artifacts -name "*.json" -path "*allure*" -exec cp {} merged-allure-results/ \;
+          
+          echo "Contents of prepared directory for merging:"
+          ls -la playwright-report-to-merge/
+      
       - name: Merge reports
         run: |
           # Install playwright and report generators
           npx playwright install --with-deps
           npm install -g allure-commandline
           
-          # Merge Playwright HTML reports
-          npx playwright merge-reports --config=playwright.config.ts ./all-artifacts
+          # Merge Playwright HTML reports with the correct directory
+          npx playwright merge-reports --config=playwright.config.ts playwright-report-to-merge
           
-          # Merge Allure reports if they exist
-          if [ -d "./all-artifacts/allure-report" ]; then
-            mkdir -p merged-allure-results
-            find ./all-artifacts -name "*.json" -path "*allure*" -exec cp {} ./merged-allure-results \;
+          # Generate Allure report if results exist
+          if [ "$(find merged-allure-results -type f | wc -l)" -gt 0 ]; then
             allure generate merged-allure-results --clean -o merged-allure-report
+          else
+            echo "No Allure report results found for merging"
           fi
       
       - uses: actions/upload-artifact@v4
