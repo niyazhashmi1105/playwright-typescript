@@ -240,6 +240,7 @@ jobs:
         path: |
           playwright-report/
           test-results/
+          allure-results/
           allure-report/
         retention-days: 5
         if-no-files-found: warn
@@ -274,6 +275,16 @@ jobs:
         run: |
           echo "Directory structure of all-artifacts:"
           find all-artifacts -type f | sort
+          
+          # Count files by type to help diagnose issues
+          echo "HTML files found:"
+          find all-artifacts -name "*.html" | wc -l
+          echo "JSON files found:"
+          find all-artifacts -name "*.json" | wc -l
+          echo "Allure files found:"
+          find all-artifacts -path "*/allure-*" -type f | wc -l
+          echo "Test results files found:"
+          find all-artifacts -path "*/test-results/*" -type f | wc -l
       
       - name: Prepare directories for report merging
         run: |
@@ -281,16 +292,23 @@ jobs:
           mkdir -p playwright-report-to-merge
           mkdir -p merged-allure-results
           
-          # Copy all HTML, JSON, and other report files from the playwright-report directories
+          echo "Looking for test artifacts in all shards..."
+          
+          # First look for playwright-report files
           find all-artifacts -path "*/playwright-report/*" -type f -exec cp -v {} playwright-report-to-merge/ \;
+          
+          # Also copy any test-results JSON files which might contain test data
+          find all-artifacts -path "*/test-results/*.json" -type f -exec cp -v {} playwright-report-to-merge/ \;
           
           # If no files were copied, create an empty index.html to prevent the merge error
           if [ ! "$(ls -A playwright-report-to-merge)" ]; then
+            echo "WARNING: No report files found in any shard's artifacts!"
             echo "<html><body><p>No test results found</p></body></html>" > playwright-report-to-merge/index.html
             echo "Created placeholder file because no report files were found"
           fi
           
-          # Copy all the allure-related JSON files to merged-allure-results directory
+          # Copy all the allure-related files to merged-allure-results directory
+          find all-artifacts -path "*/allure-results/*" -type f -exec cp -v {} merged-allure-results/ \;
           find all-artifacts -path "*/allure-report/*" -type f -exec cp -v {} merged-allure-results/ \;
           
           echo "Contents of prepared directory for merging:"
@@ -305,35 +323,56 @@ jobs:
           # Make sure the output directory exists
           mkdir -p playwright-report
           
-          # Check if there are actual report files to merge
-          if [ "$(find playwright-report-to-merge -name '*.html' -o -name '*.json' | wc -l)" -gt 1 ]; then
-            # Merge Playwright HTML reports with explicit output directory
-            npx playwright merge-reports --config=playwright.config.ts --reporter=html --output=playwright-report playwright-report-to-merge
+          echo "Checking playwright-report-to-merge directory contents before merging..."
+          find playwright-report-to-merge -type f | sort
+          
+          # Check if there are actual test report files to merge
+          REPORT_FILES_COUNT=$(find playwright-report-to-merge -type f | wc -l)
+          echo "Found $REPORT_FILES_COUNT files in playwright-report-to-merge"
+          
+          if [ $REPORT_FILES_COUNT -gt 0 ]; then
+            echo "Attempting to merge reports with Playwright merge-reports..."
+            
+            # Try to merge the reports - redirect stderr to capture any errors
+            if npx playwright merge-reports --config=playwright.config.ts --reporter=html --output=playwright-report playwright-report-to-merge 2>merge-error.log; then
+              echo "Report merge completed successfully"
+            else
+              echo "Report merge failed, checking error log:"
+              cat merge-error.log
+              
+              # Copy the files directly as a fallback
+              echo "Falling back to direct file copy..."
+              cp -r playwright-report-to-merge/* playwright-report/
+            fi
             
             # Verify that the report was created
             if [ ! -f "playwright-report/index.html" ]; then
               echo "index.html not found in playwright-report directory after merge. Creating fallback report."
-              echo "<html><body><h1>Test Report</h1><p>Report was processed but index.html was not generated properly.</p></body></html>" > playwright-report/index.html
+              echo "<html><body><h1>Test Report</h1><p>Report files were found but merge produced no index.html</p></body></html>" > playwright-report/index.html
             fi
           else
             # Create a simple report if no real reports exist
-            echo "<html><body><h1>Test Report</h1><p>No test results were found to merge.</p></body></html>" > playwright-report/index.html
-            echo "Created a simple report because no real reports were found"
+            echo "<html><body><h1>Test Report</h1><p>No test results were found to merge. Please check your test configuration and execution.</p></body></html>" > playwright-report/index.html
+            echo "Created a simple report because no report files were found"
           fi
           
           # Generate Allure report if results exist
           if [ "$(find merged-allure-results -type f | wc -l)" -gt 0 ]; then
+            echo "Found Allure result files, generating report..."
             allure generate merged-allure-results --clean -o merged-allure-report
+            
+            # Verify report was generated correctly
+            if [ ! -f "merged-allure-report/index.html" ]; then
+              echo "Allure report generation failed to create index.html, creating fallback"
+              mkdir -p merged-allure-report
+              echo "<html><body><h1>Allure Report</h1><p>Result files were found but report generation failed</p></body></html>" > merged-allure-report/index.html
+            fi
           else
             echo "No Allure report results found for merging"
             # Create a basic directory to prevent errors
             mkdir -p merged-allure-report
-            echo "<html><body><h1>No Allure Reports</h1></body></html>" > merged-allure-report/index.html
+            echo "<html><body><h1>No Allure Reports</h1><p>No test results were found to generate an Allure report.</p></body></html>" > merged-allure-report/index.html
           fi
-          
-          # Debug: List contents of playwright-report to verify
-          echo "Contents of playwright-report directory:"
-          find playwright-report -type f | sort
       
       - uses: actions/upload-artifact@v4
         with:
