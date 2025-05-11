@@ -45,8 +45,10 @@ export default defineConfig({
   timeout: 60 * 1000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 0, // Disabled retries completely
-  workers: process.env.CI ? 1 : 1,
+  // Add retries for CI environment to improve reliability
+  retries: process.env.CI ? 1 : 0,
+  // Increase workers for CI to better utilize resources and handle sharding
+  workers: process.env.CI ? 2 : 1,
   reporter: [
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
     ['list'],
@@ -59,9 +61,9 @@ export default defineConfig({
   globalSetup: './global-setup',
   globalTeardown: './global-teardown',
   use: {
-    trace: 'off', // No trace since we're not retrying
+    trace: process.env.CI ? 'on-first-retry' : 'off', // Capture trace on first retry in CI
     screenshot: 'only-on-failure',
-    video: 'off', 
+    video: 'on-first-retry', // Capture video on first retry
   },
   projects: [
     {

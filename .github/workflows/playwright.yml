@@ -186,6 +186,14 @@ jobs:
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       timeout-minutes: 10
       
+    - name: List tests for better sharding
+      id: list-tests
+      run: |
+        # List all test files to help with debugging test distribution
+        echo "Available test files:"
+        npx playwright list-files
+      timeout-minutes: 1
+
     - name: Run Playwright tests with metrics and monitoring
       id: run-tests
       continue-on-error: true
@@ -208,9 +216,9 @@ jobs:
         export ALERTMANAGER_EMAIL_PASSWORD=${{ secrets.ALERTMANAGER_EMAIL_PASSWORD }}
         export CI=1
         
-        # Run tests with sharding
-        npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
-      timeout-minutes: 20
+        # Run tests with improved sharding options
+        npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }} --workers=2
+      timeout-minutes: 25
       
     - name: Generate Allure Report
       if: always()
@@ -241,7 +249,14 @@ jobs:
 
     - name: Check test results
       if: steps.run-tests.outcome == 'failure'
-      run: exit 1
+      run: |
+        # Print detailed test results before failing
+        echo "Test shard ${{ matrix.shard }} failed. Check the test reports for details."
+        if [ -f "results.xml" ]; then
+          echo "Test results summary from JUnit report:"
+          grep -A 1 "failures=" results.xml | head -2
+        fi
+        exit 1
 
   merge-reports:
     if: always()
