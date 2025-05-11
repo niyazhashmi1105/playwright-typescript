@@ -426,18 +426,19 @@ jobs:
                     # Update the main index.html to link to this shard's report
                     if [ -f "playwright-report/index.html" ]; then
                       # Create a temporary file with the HTML link
-                      cat > playwright-report/shard-link.html << EOF
-                <!-- Shard Links -->
-                <div class="shard-links" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
-                <h2>Additional Shard Reports</h2>
-                <div style="margin-top: 10px; padding: 10px;">
-                <h3>Report from Shard ${shard_num}</h3>
-                <a href="shard-${shard_num}/index.html">View Shard ${shard_num} Report</a>
-                </div>
-                </div>
-                EOF
-                      # Insert the content before </body> tag
-                      sed -i.bak "s|</body>|$(cat playwright-report/shard-link.html)\n</body>|" playwright-report/index.html
+                      cat > playwright-report/shard-link.html << 'EOFMARKER'
+                    <!-- Shard Links -->
+                    <div class="shard-links" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
+                    <h2>Additional Shard Reports</h2>
+                    <div style="margin-top: 10px; padding: 10px;">
+                    <h3>Report from Shard ${shard_num}</h3>
+                    <a href="shard-${shard_num}/index.html">View Shard ${shard_num} Report</a>
+                      </div>
+                    </div>
+                    EOFMARKER
+                      # Insert the content before </body> tag using a more robust approach
+                      LINK_CONTENT=$(cat playwright-report/shard-link.html | sed "s/\${shard_num}/$shard_num/g")
+                      sed -i.bak "s|</body>|$LINK_CONTENT\n</body>|" playwright-report/index.html
                       rm -f playwright-report/shard-link.html
                     fi
                   fi
