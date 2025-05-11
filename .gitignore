@@ -20,6 +20,8 @@ my-report/ortoni-data/
 my-report/ortoni-data-history.sqlite
 my-report/trace/
 !my-report/index.html
+results.xml
+
 
 # Docker volumes
 prometheus_data/

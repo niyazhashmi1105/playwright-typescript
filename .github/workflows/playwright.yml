@@ -217,7 +217,7 @@ jobs:
         export CI=1
         
         # Run tests with improved sharding options
-        npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }} --workers=2
+        npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }} --workers=1
       timeout-minutes: 25
       
     - name: Generate Allure Report
