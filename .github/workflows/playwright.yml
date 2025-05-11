@@ -274,6 +274,7 @@ jobs:
       - name: Merge reports
         run: |
           # Install playwright and report generators
+          npx playwright install
           npm install -g allure-commandline
           
           # Merge Playwright HTML reports
