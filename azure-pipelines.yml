@@ -1,0 +1,104 @@
+trigger:
+  - main  # Configure to trigger on your main branch
+
+pool:
+  vmImage: 'ubuntu-latest'  # Use Ubuntu agent (you can use windows or macOS too)
+
+variables:
+  npm_config_cache: $(Pipeline.Workspace)/.npm
+
+stages:
+  - stage: Test
+    displayName: 'Run Tests'
+    jobs:
+      - job: RunTests
+        displayName: 'Run Playwright Tests'
+        timeoutInMinutes: '60'  # Adjust based on your test suite runtime
+        
+        steps:
+          # Use Node.js
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+            displayName: 'Install Node.js'
+          
+          # Install dependencies
+          - task: Cache@2
+            inputs:
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: $(npm_config_cache)
+            displayName: 'Cache npm dependencies'
+          
+          - script: |
+              npm ci
+            displayName: 'Install dependencies'
+          
+          # Install Playwright browsers
+          - script: |
+              npx playwright install --with-deps
+            displayName: 'Install Playwright browsers'
+          
+          # Run the tests using our custom script
+          - script: |
+              node scripts/azure-devops-run.js
+            displayName: 'Run Playwright tests'
+            env:
+              CI: 'true'
+              # You can specify TEST_COMMAND here to override the default
+              TEST_COMMAND: 'npm run all:headless'
+              # Add any other environment variables your tests need
+              # BASE_URL: $(baseUrl)
+          
+          # Generate Allure report
+          - script: |
+              npx allure generate allure-results --clean -o allure-report
+            displayName: 'Generate Allure report'
+            condition: always()
+          
+          # Publish test results
+          - task: PublishTestResults@2
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'results.xml'
+              mergeTestResults: true
+              testRunTitle: 'Playwright Tests'
+            displayName: 'Publish test results'
+          
+          # Publish Allure Reports
+          - task: PublishPipelineArtifact@1
+            condition: always()
+            inputs:
+              targetPath: '$(System.DefaultWorkingDirectory)/allure-report'
+              artifact: 'allure-report'
+              publishLocation: 'pipeline'
+            displayName: 'Publish Allure report'
+          
+          # Publish HTML report
+          - task: PublishPipelineArtifact@1
+            condition: always()
+            inputs:
+              targetPath: '$(System.DefaultWorkingDirectory)/playwright-report'
+              artifact: 'playwright-report'
+              publishLocation: 'pipeline'
+            displayName: 'Publish Playwright HTML report'
+          
+          # Publish JSON results
+          - task: PublishPipelineArtifact@1
+            condition: always()
+            inputs:
+              targetPath: '$(System.DefaultWorkingDirectory)/test-results'
+              artifact: 'test-results-json'
+              publishLocation: 'pipeline'
+            displayName: 'Publish test results JSON'
+          
+          # Publish custom report
+          - task: PublishPipelineArtifact@1
+            condition: always()
+            inputs:
+              targetPath: '$(System.DefaultWorkingDirectory)/my-report'
+              artifact: 'my-report'
+              publishLocation: 'pipeline'
+            displayName: 'Publish custom report'
