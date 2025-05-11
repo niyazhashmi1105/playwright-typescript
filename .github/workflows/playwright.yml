@@ -215,7 +215,6 @@ jobs:
         export CI=1
         
         # Run tests with improved sharding options
-        npm run pretest
         npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }} --workers=1
       timeout-minutes: 25
       
@@ -274,7 +273,7 @@ jobs:
       - name: Merge reports
         run: |
           # Install playwright and report generators
-          npx playwright install
+          npx playwright install --with-deps
           npm install -g allure-commandline
           
           # Merge Playwright HTML reports
