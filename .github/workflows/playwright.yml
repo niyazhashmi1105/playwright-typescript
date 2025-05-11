@@ -385,7 +385,7 @@ jobs:
             
             # Try to merge the reports using the reorganized files
             echo "Attempting to merge with Playwright merge-reports..."
-            if npx playwright merge-reports --config=playwright.config.ts --reporter=html --output=playwright-report temp-merge-dir 2>merge-error.log; then
+            if npx playwright merge-reports --config=playwright.config.ts --reporter html --output playwright-report temp-merge-dir 2>merge-error.log; then
               echo "Report merge completed successfully"
             else
               echo "Report merge failed, checking error log:"
@@ -410,6 +410,7 @@ jobs:
               
               if [ ! -z "$primary_shard" ]; then
                 echo "Using $primary_shard as the primary report"
+                mkdir -p playwright-report
                 cp -r "$primary_shard"/* playwright-report/
                 
                 # Create a combined index.html that references both reports
@@ -424,21 +425,26 @@ jobs:
                     
                     # Update the main index.html to link to this shard's report
                     if [ -f "playwright-report/index.html" ]; then
-                      echo "
-                        <div style='margin-top: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;'>
-                          <h3>Report from Shard $shard_num</h3>
-                          <a href='shard-$shard_num/index.html'>View Shard $shard_num Report</a>
-                        </div>" >> playwright-report/index-links.html
-                        
-                      # Insert the links before the closing body tag
-                      sed -i.bak '/<\/body>/i\\n<!-- Shard Links -->\n<div class="shard-links">\n<h2>Additional Shard Reports</h2>\n'$(cat playwright-report/index-links.html)'\n</div>' playwright-report/index.html
-                      rm playwright-report/index-links.html
-                      rm playwright-report/index.html.bak
+                      # Create a temporary file with the HTML link
+                      cat > playwright-report/shard-link.html << EOF
+                <!-- Shard Links -->
+                <div class="shard-links" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
+                <h2>Additional Shard Reports</h2>
+                <div style="margin-top: 10px; padding: 10px;">
+                <h3>Report from Shard ${shard_num}</h3>
+                <a href="shard-${shard_num}/index.html">View Shard ${shard_num} Report</a>
+                </div>
+                </div>
+                EOF
+                      # Insert the content before </body> tag
+                      sed -i.bak "s|</body>|$(cat playwright-report/shard-link.html)\n</body>|" playwright-report/index.html
+                      rm -f playwright-report/shard-link.html
                     fi
                   fi
                 done
               else
                 echo "No primary report found, copying all report files"
+                mkdir -p playwright-report
                 cp -r playwright-report-to-merge/* playwright-report/
               fi
             fi
