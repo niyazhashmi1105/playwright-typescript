@@ -270,14 +270,10 @@ jobs:
           pattern: playwright-report-shard-*
           merge-multiple: true
       
-      - name: List directory structure for debugging
+      - name: Debug directory structure
         run: |
           echo "Directory structure of all-artifacts:"
-          ls -la all-artifacts
-          echo "Checking for playwright-report in each shard:"
-          find all-artifacts -type d -name "playwright-report" | xargs -I {} ls -la {}
-          echo "Checking for test-results in each shard:"
-          find all-artifacts -type d -name "test-results" | xargs -I {} ls -la {}
+          find all-artifacts -type f | sort
       
       - name: Prepare directories for report merging
         run: |
@@ -285,11 +281,17 @@ jobs:
           mkdir -p playwright-report-to-merge
           mkdir -p merged-allure-results
           
-          # Copy all the playwright-report contents from shards to a single location
-          find all-artifacts -type f -path "*/playwright-report/*" -exec cp {} playwright-report-to-merge/ \;
+          # Copy all HTML, JSON, and other report files from the playwright-report directories
+          find all-artifacts -path "*/playwright-report/*" -type f -exec cp -v {} playwright-report-to-merge/ \;
+          
+          # If no files were copied, create an empty index.html to prevent the merge error
+          if [ ! "$(ls -A playwright-report-to-merge)" ]; then
+            echo "<html><body><p>No test results found</p></body></html>" > playwright-report-to-merge/index.html
+            echo "Created placeholder file because no report files were found"
+          fi
           
           # Copy all the allure-related JSON files to merged-allure-results directory
-          find all-artifacts -name "*.json" -path "*allure*" -exec cp {} merged-allure-results/ \;
+          find all-artifacts -path "*/allure-report/*" -type f -exec cp -v {} merged-allure-results/ \;
           
           echo "Contents of prepared directory for merging:"
           ls -la playwright-report-to-merge/
@@ -300,14 +302,25 @@ jobs:
           npx playwright install --with-deps
           npm install -g allure-commandline
           
-          # Merge Playwright HTML reports with the correct directory
-          npx playwright merge-reports --config=playwright.config.ts playwright-report-to-merge
+          # Check if there are actual report files to merge
+          if [ "$(find playwright-report-to-merge -name '*.html' -o -name '*.json' | wc -l)" -gt 1 ]; then
+            # Merge Playwright HTML reports
+            npx playwright merge-reports --config=playwright.config.ts playwright-report-to-merge
+          else
+            # Create a simple report if no real reports exist
+            mkdir -p playwright-report
+            echo "<html><body><h1>Test Report</h1><p>No test results were found to merge.</p></body></html>" > playwright-report/index.html
+            echo "Created a simple report because no real reports were found"
+          fi
           
           # Generate Allure report if results exist
           if [ "$(find merged-allure-results -type f | wc -l)" -gt 0 ]; then
             allure generate merged-allure-results --clean -o merged-allure-report
           else
             echo "No Allure report results found for merging"
+            # Create a basic directory to prevent errors
+            mkdir -p merged-allure-report
+            echo "<html><body><h1>No Allure Reports</h1></body></html>" > merged-allure-report/index.html
           fi
       
       - uses: actions/upload-artifact@v4
