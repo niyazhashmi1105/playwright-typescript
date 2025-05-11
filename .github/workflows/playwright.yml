@@ -302,13 +302,21 @@ jobs:
           npx playwright install --with-deps
           npm install -g allure-commandline
           
+          # Make sure the output directory exists
+          mkdir -p playwright-report
+          
           # Check if there are actual report files to merge
           if [ "$(find playwright-report-to-merge -name '*.html' -o -name '*.json' | wc -l)" -gt 1 ]; then
-            # Merge Playwright HTML reports
-            npx playwright merge-reports --config=playwright.config.ts playwright-report-to-merge
+            # Merge Playwright HTML reports with explicit output directory
+            npx playwright merge-reports --config=playwright.config.ts --reporter=html --output=playwright-report playwright-report-to-merge
+            
+            # Verify that the report was created
+            if [ ! -f "playwright-report/index.html" ]; then
+              echo "index.html not found in playwright-report directory after merge. Creating fallback report."
+              echo "<html><body><h1>Test Report</h1><p>Report was processed but index.html was not generated properly.</p></body></html>" > playwright-report/index.html
+            fi
           else
             # Create a simple report if no real reports exist
-            mkdir -p playwright-report
             echo "<html><body><h1>Test Report</h1><p>No test results were found to merge.</p></body></html>" > playwright-report/index.html
             echo "Created a simple report because no real reports were found"
           fi
@@ -322,6 +330,10 @@ jobs:
             mkdir -p merged-allure-report
             echo "<html><body><h1>No Allure Reports</h1></body></html>" > merged-allure-report/index.html
           fi
+          
+          # Debug: List contents of playwright-report to verify
+          echo "Contents of playwright-report directory:"
+          find playwright-report -type f | sort
       
       - uses: actions/upload-artifact@v4
         with:
