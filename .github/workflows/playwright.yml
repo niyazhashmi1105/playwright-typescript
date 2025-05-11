@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         # Define the number of shards you want to use (e.g., 3 shards)
-        shard: [1, 2, 3]
+        shard: [1, 2]
     
     env:
       GRAFANA_URL: http://grafana:3000
@@ -63,7 +63,7 @@ jobs:
         scrape_configs:
           - job_name: 'playwright-tests-shard-${{ matrix.shard }}'
             static_configs:
-              - targets: ['localhost:${{ env.SHARD_METRICS_PORT }}']
+              - targets: ['localhost:${{env.SHARD_METRICS_PORT }}']
         EOF
         docker run -d \
           --name prometheus \
@@ -217,6 +217,7 @@ jobs:
         export CI=1
         
         # Run tests with improved sharding options
+        npm run pretest
         npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }} --workers=1
       timeout-minutes: 25
       
