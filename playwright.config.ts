@@ -52,7 +52,6 @@ export default defineConfig({
   reporter: [
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
     ['list'],
-    ['junit', { outputFile: 'results.xml' }],
     ['allure-playwright'],
     ['json', { outputFile: 'test-results/test-results.json' }],
     ['./utils/email-reporter.ts'],

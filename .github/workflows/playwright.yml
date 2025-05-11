@@ -243,7 +243,6 @@ jobs:
         path: |
           playwright-report/
           test-results/
-          my-report/
           allure-report/
         retention-days: 5
         if-no-files-found: warn
@@ -251,12 +250,6 @@ jobs:
     - name: Check test results
       if: steps.run-tests.outcome == 'failure'
       run: |
-        # Print detailed test results before failing
-        echo "Test shard ${{ matrix.shard }} failed. Check the test reports for details."
-        if [ -f "results.xml" ]; then
-          echo "Test results summary from JUnit report:"
-          grep -A 1 "failures=" results.xml | head -2
-        fi
         exit 1
 
   merge-reports:
