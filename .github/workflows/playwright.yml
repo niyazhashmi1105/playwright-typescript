@@ -385,7 +385,7 @@ jobs:
             
             # Try to merge the reports using the reorganized files
             echo "Attempting to merge with Playwright merge-reports..."
-            if npx playwright merge-reports --config=playwright.config.ts --reporter html --output playwright-report temp-merge-dir 2>merge-error.log; then
+            if npx playwright merge-reports --config=playwright.config.ts --reporter html temp-merge-dir 2>merge-error.log; then
               echo "Report merge completed successfully"
             else
               echo "Report merge failed, checking error log:"
@@ -438,10 +438,8 @@ jobs:
                       # Create a simple temporary file for the link content
                       echo "$LINK_HTML" > playwright-report/shard-link.html
                       
-                      # Insert the content before </body> tag
-                      # Use a simpler approach that's more reliable in CI environments
-                      awk '{print} /<\/body>/{print "'"$LINK_HTML"'"}' playwright-report/index.html > playwright-report/index.html.new
-                      mv playwright-report/index.html.new playwright-report/index.html
+                      # Insert the content before </body> tag using a safer sed command instead of awk
+                      sed -i 's|</body>|'"$LINK_HTML"'</body>|' playwright-report/index.html
                     fi
                   fi
                 done
