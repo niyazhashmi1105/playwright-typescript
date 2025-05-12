@@ -425,21 +425,19 @@ jobs:
                     
                     # Update the main index.html to link to this shard's report
                     if [ -f "playwright-report/index.html" ]; then
-                      # Create HTML content directly as a variable instead of using heredoc
-                      LINK_HTML="
-                      <div class=\"shard-links\" style=\"margin-top: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;\">
+                      # Create a link HTML file for each shard
+                      cat > link-content.html << EOF
+                      <div class="shard-links" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
                       <h2>Additional Shard Reports</h2>
-                      <div style=\"margin-top: 10px; padding: 10px;\">
+                      <div style="margin-top: 10px; padding: 10px;">
                       <h3>Report from Shard $shard_num</h3>
-                      <a href=\"shard-$shard_num/index.html\">View Shard $shard_num Report</a>
-                        </div>
-                      </div>"
-                      
-                      # Create a simple temporary file for the link content
-                      echo "$LINK_HTML" > playwright-report/shard-link.html
-                      
-                      # Insert the content before </body> tag using a safer sed command instead of awk
-                      sed -i 's|</body>|'"$LINK_HTML"'</body>|' playwright-report/index.html
+                      <a href="shard-$shard_num/index.html">View Shard $shard_num Report</a>
+                      </div>
+                      </div>
+                      EOF
+                      # Use awk to insert the content before </body> tag, which handles special characters better
+                      awk -v content="$(cat link-content.html)" '/<\/body>/ {print content} {print}' playwright-report/index.html > playwright-report/index.html.new
+                      mv playwright-report/index.html.new playwright-report/index.html
                     fi
                   fi
                 done
