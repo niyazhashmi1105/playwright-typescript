@@ -426,7 +426,7 @@ jobs:
                     # Update the main index.html to link to this shard's report
                     if [ -f "playwright-report/index.html" ]; then
                       # Create HTML content directly as a variable instead of using heredoc
-                      LINK_HTML="<!-- Shard Links -->
+                      LINK_HTML="
                       <div class=\"shard-links\" style=\"margin-top: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;\">
                       <h2>Additional Shard Reports</h2>
                       <div style=\"margin-top: 10px; padding: 10px;\">
