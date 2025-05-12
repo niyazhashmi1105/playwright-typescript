@@ -14,11 +14,6 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # Define the number of shards you want to use (e.g., 3 shards)
-        shard: [1, 2]
     
     env:
       GRAFANA_URL: http://grafana:3000
@@ -37,18 +32,12 @@ jobs:
       GRAFANA_API_KEY: ${{ secrets.GRAFANA_API_KEY }}
       SMTP_FROM_NAME: "Playwright Test Monitor"
       PLAYWRIGHT_VERSION: 1.52.0
-      # Base port for metrics
-      METRICS_PORT_BASE: 9323
 
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Set metrics port
-      id: set-port
-      run: echo "SHARD_METRICS_PORT=$((${{ env.METRICS_PORT_BASE }} + ${{ matrix.shard }}))" >> $GITHUB_ENV
 
     - name: Create Docker network
       run: docker network create monitoring-network
@@ -61,9 +50,9 @@ jobs:
         global:
           scrape_interval: 15s
         scrape_configs:
-          - job_name: 'playwright-tests-shard-${{ matrix.shard }}'
+          - job_name: 'playwright-tests'
             static_configs:
-              - targets: ['localhost:${{env.SHARD_METRICS_PORT }}']
+              - targets: ['localhost:${{ env.METRICS_PORT }}']
         EOF
         docker run -d \
           --name prometheus \
@@ -184,10 +173,9 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
       
-    - name: List tests for better sharding
-      id: list-tests
+    - name: List tests
       run: |
-        # List all test files to help with debugging test distribution
+        # List all test files to help with debugging
         echo "Available test files:"
         npx playwright list-files
       timeout-minutes: 1
@@ -197,7 +185,7 @@ jobs:
       continue-on-error: true
       run: |
         # Set up environment variables for Playwright
-        export METRICS_PORT=${{ env.SHARD_METRICS_PORT }}
+        export METRICS_PORT=${{ env.METRICS_PORT }}
         export GRAFANA_API_KEY=${{ secrets.GRAFANA_API_KEY }}
         export GRAFANA_URL=${{ env.GRAFANA_URL }}
         export PLAYWRIGHT_METRICS=${{ env.PLAYWRIGHT_METRICS }}
@@ -214,9 +202,9 @@ jobs:
         export ALERTMANAGER_EMAIL_PASSWORD=${{ secrets.ALERTMANAGER_EMAIL_PASSWORD }}
         export CI=1
         
-        # Run tests with improved sharding options
-        npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }} --workers=1
-      timeout-minutes: 25
+        # Run tests with multiple workers for better performance
+        npx playwright test --workers=3
+      timeout-minutes: 30
       
     - name: Generate Allure Report
       if: always()
@@ -236,7 +224,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-report-shard-${{ matrix.shard }}
+        name: playwright-report
         path: |
           playwright-report/
           test-results/
@@ -245,249 +233,32 @@ jobs:
         retention-days: 5
         if-no-files-found: warn
 
+    - name: Upload Allure Report to GitHub Pages
+      if: always() && github.ref == 'refs/heads/main' && hashFiles('allure-report/**/*') != ''
+      run: |
+        # Configure Git
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
+        # Create a fresh deployment branch
+        git checkout --orphan gh-pages-temp
+        
+        # Clear working directory except for allure-report
+        find . -mindepth 1 -maxdepth 1 -not -name 'allure-report' -not -name '.git' -exec rm -rf {} \;
+        
+        # Move allure-report content to root
+        cp -r allure-report/* .
+        rm -rf allure-report
+        
+        # Add files and commit
+        git add .
+        git commit -m "Deploy Allure report to GitHub Pages"
+        
+        # Force push to gh-pages
+        git push origin gh-pages-temp:gh-pages --force
+      timeout-minutes: 5
+
     - name: Check test results
       if: steps.run-tests.outcome == 'failure'
       run: |
         exit 1
-
-  merge-reports:
-    if: always()
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Download artifacts from all shards
-        uses: actions/download-artifact@v4
-        with:
-          path: all-artifacts
-          pattern: playwright-report-shard-*
-          merge-multiple: false  # Changed to false to preserve each shard's directory structure
-      
-      - name: Debug directory structure
-        run: |
-          echo "Directory structure of all-artifacts:"
-          find all-artifacts -type f | sort
-          
-          # Count files by type to help diagnose issues
-          echo "HTML files found:"
-          find all-artifacts -name "*.html" | wc -l
-          echo "JSON files found:"
-          find all-artifacts -name "*.json" | wc -l
-          echo "Allure files found:"
-          find all-artifacts -path "*/allure-*" -type f | wc -l
-          echo "Test results files found:"
-          find all-artifacts -path "*/test-results/*" -type f | wc -l
-      
-      - name: Prepare directories for report merging
-        run: |
-          # Create directories to hold report files
-          mkdir -p playwright-report-to-merge
-          mkdir -p merged-allure-results
-          
-          echo "Looking for test artifacts in all shards..."
-          
-          # List all shard directories
-          echo "All shard directories:"
-          ls -la all-artifacts/
-          
-          # First look for playwright-report files, preserving shard information
-          for shard_dir in all-artifacts/playwright-report-shard-*; do
-            shard_num=$(basename "$shard_dir" | sed 's/playwright-report-shard-//')
-            echo "Processing shard: $shard_num"
-            
-            # Create a subdirectory for each shard to prevent filename conflicts
-            mkdir -p "playwright-report-to-merge/shard-$shard_num"
-            
-            # Copy playwright-report files from this shard
-            if [ -d "$shard_dir/playwright-report" ]; then
-              echo "Found playwright-report directory in shard $shard_num"
-              cp -rv "$shard_dir/playwright-report/"* "playwright-report-to-merge/shard-$shard_num/"
-            else
-              echo "No playwright-report directory in shard $shard_num"
-            fi
-            
-            # Copy test-results JSON files from this shard
-            if [ -d "$shard_dir/test-results" ]; then
-              echo "Found test-results directory in shard $shard_num"
-              find "$shard_dir/test-results" -name "*.json" -exec cp -v {} "playwright-report-to-merge/shard-$shard_num/" \;
-            else
-              echo "No test-results directory in shard $shard_num"
-            fi
-            
-            # Copy allure files from this shard
-            if [ -d "$shard_dir/allure-results" ]; then
-              cp -rv "$shard_dir/allure-results/"* merged-allure-results/
-            fi
-            
-            if [ -d "$shard_dir/allure-report" ]; then
-              cp -rv "$shard_dir/allure-report/"* merged-allure-results/
-            fi
-          done
-          
-          # If no files were copied, create an empty index.html to prevent the merge error
-          if [ ! "$(find playwright-report-to-merge -mindepth 1 -type f | head -n1)" ]; then
-            echo "WARNING: No report files found in any shard's artifacts!"
-            echo "<html><body><p>No test results found</p></body></html>" > playwright-report-to-merge/index.html
-            echo "Created placeholder file because no report files were found"
-          fi
-          
-          echo "Contents of prepared directory for merging:"
-          find playwright-report-to-merge -type f | sort
-      
-      - name: Merge reports
-        run: |
-          # Install playwright and report generators
-          npx playwright install --with-deps
-          npm install -g allure-commandline
-          
-          # Make sure the output directory exists
-          mkdir -p playwright-report
-          
-          echo "Checking playwright-report-to-merge directory contents before merging..."
-          find playwright-report-to-merge -type f | sort
-          
-          # Check if there are actual test report files to merge
-          REPORT_FILES_COUNT=$(find playwright-report-to-merge -type f | wc -l)
-          echo "Found $REPORT_FILES_COUNT files in playwright-report-to-merge"
-          
-          if [ $REPORT_FILES_COUNT -gt 0 ]; then
-            echo "Creating JSON file lists for each shard for better merging"
-            
-            # Create temporary directory for proper merging
-            mkdir -p temp-merge-dir
-            
-            # First collect all JSON files by shard
-            for shard_dir in playwright-report-to-merge/shard-*; do
-              if [ -d "$shard_dir" ]; then
-                shard_num=$(basename "$shard_dir" | sed 's/shard-//')
-                echo "Processing JSON files from shard $shard_num"
-                
-                # Find all report JSON files in this shard
-                json_files=$(find "$shard_dir" -name "*.json" -not -path "*/trace/*")
-                if [ ! -z "$json_files" ]; then
-                  # Create a consolidated JSON for this shard in the temp directory
-                  mkdir -p "temp-merge-dir/shard-$shard_num"
-                  cp $json_files "temp-merge-dir/shard-$shard_num/"
-                fi
-                
-                # Also copy any HTML files from this shard
-                find "$shard_dir" -name "*.html" -exec cp {} "temp-merge-dir/" \;
-              fi
-            done
-            
-            # Try to merge the reports using the reorganized files
-            echo "Attempting to merge with Playwright merge-reports..."
-            if npx playwright merge-reports --config=playwright.config.ts --reporter html temp-merge-dir 2>merge-error.log; then
-              echo "Report merge completed successfully"
-            else
-              echo "Report merge failed, checking error log:"
-              cat merge-error.log
-              
-              # Copy the most complete report as a fallback
-              echo "Merging failed. Using fallback approach to combine reports..."
-              
-              # First check which shard's report has more content (likely more complete)
-              max_size=0
-              primary_shard=""
-              
-              for shard_dir in playwright-report-to-merge/shard-*; do
-                if [ -d "$shard_dir" ]; then
-                  dir_size=$(du -s "$shard_dir" | cut -f1)
-                  if [ "$dir_size" -gt "$max_size" ]; then
-                    max_size=$dir_size
-                    primary_shard=$shard_dir
-                  fi
-                fi
-              done
-              
-              if [ ! -z "$primary_shard" ]; then
-                echo "Using $primary_shard as the primary report"
-                mkdir -p playwright-report
-                cp -r "$primary_shard"/* playwright-report/
-                
-                # Create a combined index.html that references both reports
-                for shard_dir in playwright-report-to-merge/shard-*; do
-                  if [ "$shard_dir" != "$primary_shard" ] && [ -d "$shard_dir" ]; then
-                    shard_num=$(basename "$shard_dir" | sed 's/shard-//')
-                    echo "Adding links to report from shard $shard_num"
-                    
-                    # Create directory for this shard's report
-                    mkdir -p "playwright-report/shard-$shard_num"
-                    cp -r "$shard_dir"/* "playwright-report/shard-$shard_num/"
-                    
-                    # Update the main index.html to link to this shard's report
-                    if [ -f "playwright-report/index.html" ]; then
-                      # Create a link HTML file for each shard
-                      cat > link-content.html << EOF
-                      <div class="shard-links" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
-                      <h2>Additional Shard Reports</h2>
-                      <div style="margin-top: 10px; padding: 10px;">
-                      <h3>Report from Shard $shard_num</h3>
-                      <a href="shard-$shard_num/index.html">View Shard $shard_num Report</a>
-                      </div>
-                      </div>
-                      EOF
-                      # Use awk to insert the content before </body> tag, which handles special characters better
-                      awk -v content="$(cat link-content.html)" '/<\/body>/ {print content} {print}' playwright-report/index.html > playwright-report/index.html.new
-                      mv playwright-report/index.html.new playwright-report/index.html
-                    fi
-                  fi
-                done
-              else
-                echo "No primary report found, copying all report files"
-                mkdir -p playwright-report
-                cp -r playwright-report-to-merge/* playwright-report/
-              fi
-            fi
-            
-            # Verify that the report was created
-            if [ ! -f "playwright-report/index.html" ]; then
-              echo "index.html not found in playwright-report directory after merge. Creating fallback report."
-              echo "<html><body><h1>Test Report</h1><p>Report files were found but merge produced no index.html</p></body></html>" > playwright-report/index.html
-            fi
-          else
-            # Create a simple report if no real reports exist
-            echo "<html><body><h1>Test Report</h1><p>No test results were found to merge. Please check your test configuration and execution.</p></body></html>" > playwright-report/index.html
-            echo "Created a simple report because no report files were found"
-          fi
-      
-      - uses: actions/upload-artifact@v4
-        with:
-          name: merged-playwright-report
-          path: |
-            playwright-report/
-            merged-allure-report/
-          retention-days: 5
-      
-      - name: Upload Allure Report to GitHub Pages
-        if: github.ref == 'refs/heads/main' && hashFiles('merged-allure-report/**/*') != ''
-        run: |
-          # Configure Git
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          
-          # Create a fresh deployment branch
-          git checkout --orphan gh-pages-temp
-          
-          # Clear working directory except for merged-allure-report
-          find . -mindepth 1 -maxdepth 1 -not -name 'merged-allure-report' -not -name '.git' -exec rm -rf {} \;
-          
-          # Move allure-report content to root
-          cp -r merged-allure-report/* .
-          rm -rf merged-allure-report
-          
-          # Add files and commit
-          git add .
-          git commit -m "Deploy merged Allure report to GitHub Pages"
-          
-          # Force push to gh-pages
-          git push origin gh-pages-temp:gh-pages --force
-        timeout-minutes: 5
