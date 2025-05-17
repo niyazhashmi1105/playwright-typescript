@@ -50,7 +50,7 @@ export default defineConfig({
   // Increase workers for CI to better utilize resources and handle sharding
   workers: process.env.CI ? 2 : 1,
   reporter: [
-    ['html', { open: 'never', outputFolder: 'playwright-report' }],
+    ['html', { open: 'always', outputFolder: 'playwright-report' }],
     ['list'],
     ['allure-playwright'],
     ['json', { outputFile: 'test-results/test-results.json' }],

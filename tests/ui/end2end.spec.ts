@@ -1,6 +1,6 @@
-import { test, expect } from '../fixtures/my-fixture';
+import { test, expect } from '../../fixtures/my-fixture';
 import * as fs from 'fs';
-import {PasswordUtils}  from '../utils/password-utils';
+import {PasswordUtils}  from '../../utils/password-utils';
 
 interface TestData {
     std_user: string;
