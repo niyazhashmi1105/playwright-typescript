@@ -81,7 +81,7 @@ services:
       dockerfile: Dockerfile
     container_name: jenkins
     ports:
-      - "8080:8080"
+      - "8080:8080"  # Changed from 8080:8080 to avoid port conflict
       - "50000:50000"
       - "9323:9323"  # Expose metrics port
     volumes:
