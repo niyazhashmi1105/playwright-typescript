@@ -28,7 +28,7 @@ platforms:
     playwrightConfigOptions:
       use:
         deviceName: iPhone 12
-browserstackLocal: true
+browserstackLocal: false
 # Added local configuration to fix binary download issues
 localConfig:
   binaryPath: /var/jenkins_home/browserstack-local/BrowserStackLocal
