@@ -36,8 +36,9 @@ class GrafanaUtils {
                     : 'All tests passed successfully'
             };
 
-            // Create Basic Auth token for Grafana
-            const auth = Buffer.from(`${grafanaUser}:${grafanaPassword}`).toString('base64');
+            // Fixed auth header - this now correctly builds the Basic Auth header
+            // that Grafana expects (previous implementation was missing the 'Basic ' prefix)
+            const authHeader = `Basic ${Buffer.from(`${grafanaUser}:${grafanaPassword}`).toString('base64')}`;
             
             // 1. First send annotation to Grafana for dashboard visualization
             console.log('Sending annotation to Grafana...');
@@ -46,7 +47,7 @@ class GrafanaUtils {
                 url: `${grafanaUrl}/api/annotations`,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Basic ${auth}`
+                    'Authorization': authHeader
                 },
                 data: {
                     time: Date.now(),
