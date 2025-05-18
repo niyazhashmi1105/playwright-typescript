@@ -21,6 +21,7 @@ my-report/ortoni-data-history.sqlite
 my-report/trace/
 !my-report/index.html
 results.xml
+.obser_test_details
 
 
 # Docker volumes
