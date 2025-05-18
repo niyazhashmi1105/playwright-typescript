@@ -10,6 +10,8 @@ class GrafanaUtils {
             // Get authentication details for Grafana
             const grafanaUser = process.env.GF_SECURITY_ADMIN_USER || 'admin';
             const grafanaPassword = process.env.GF_SECURITY_ADMIN_PASSWORD || 'admin';
+            // Add Grafana API key for CI environment
+            const grafanaApiKey = process.env.GRAFANA_API_KEY;
 
             console.log('Connecting to Grafana at:', grafanaUrl);
 
@@ -36,9 +38,16 @@ class GrafanaUtils {
                     : 'All tests passed successfully'
             };
 
-            // Fixed auth header - this now correctly builds the Basic Auth header
-            // that Grafana expects (previous implementation was missing the 'Basic ' prefix)
-            const authHeader = `Basic ${Buffer.from(`${grafanaUser}:${grafanaPassword}`).toString('base64')}`;
+            // Set auth header based on environment
+            // Use API key auth in CI environment if available, otherwise fall back to basic auth
+            let authHeader;
+            if (process.env.CI && grafanaApiKey) {
+                authHeader = `Bearer ${grafanaApiKey}`;
+                console.log('Using API key authentication for Grafana');
+            } else {
+                authHeader = `Basic ${Buffer.from(`${grafanaUser}:${grafanaPassword}`).toString('base64')}`;
+                console.log('Using basic auth authentication for Grafana');
+            }
             
             // 1. First send annotation to Grafana for dashboard visualization
             console.log('Sending annotation to Grafana...');

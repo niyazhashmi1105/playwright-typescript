@@ -93,6 +93,7 @@ services:
       - METRICS_PORT=9323
       - PLAYWRIGHT_METRICS=true
       - CI=true
+      - GRAFANA_API_KEY=${GRAFANA_API_KEY}
     restart: unless-stopped
     networks:
       - monitoring-network
