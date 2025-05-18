@@ -29,6 +29,17 @@ platforms:
       use:
         deviceName: iPhone 12
 browserstackLocal: true
+# Added local configuration to fix binary download issues
+localConfig:
+  binaryPath: /var/jenkins_home/browserstack-local
+  localIdentifier: jenkins-local
+  forceLocal: true
+  verbose: true
+  force: true
+  binaryOptions:
+    force-local: true
+    only-automate: true
+    verbose: true
 buildName: bstack-playwright-demo
 projectName: BrowserStack Playwright Automation Test suite
 CUSTOM_TAG_1: "Playwright-Browserstack-Build"
