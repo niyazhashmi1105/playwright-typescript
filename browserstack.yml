@@ -1,5 +1,5 @@
-userName: ${BROWSERSTACK_USERNAME}
-accessKey: ${BROWSERSTACK_ACCESS_KEY}
+userName: mdniyazhashmi_h1Ux6p
+accessKey: iTE5EC6uHJzsupUwszRC
 framework: playwright
 platforms:
   - os: Windows
@@ -10,10 +10,10 @@ platforms:
     osVersion: Ventura
     browserName: playwright-webkit
     browserVersion: latest
-  - os: Windows
-    osVersion: 11
-    browserName: playwright-firefox
-    browserVersion: latest
+  # - os: Windows
+  #   osVersion: 11
+  #   browserName: playwright-firefox
+  #   browserVersion: latest
   - os: Windows
     osVersion: 11
     browserName: edge

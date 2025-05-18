@@ -26,7 +26,7 @@ npx playwright install
 
 # Run tests
 echo "Running tests..."
-PLAYWRIGHT_HTML_REPORT=playwright-report npm run test:all || true
+PLAYWRIGHT_HTML_REPORT=playwright-report npm run execute:tests || true
 
 # Set Jenkins-friendly permissions
 echo "Setting permissions..."
