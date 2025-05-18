@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { ApiUtils } from '../../utils/api.utils';
 import { Post, User } from '../../utils/api.types';
+import { faker } from '@faker-js/faker';
 
 test.describe('PUT API Tests', () => {
   const baseUrl = 'https://jsonplaceholder.typicode.com';
@@ -9,9 +10,9 @@ test.describe('PUT API Tests', () => {
     const postId = 1;
     const updatedData = {
       id: postId,
-      title: 'Updated Post Title',
-      body: 'This post has been updated with Playwright and Axios',
-      userId: 1
+      title: faker.lorem.sentence(),
+      body: faker.lorem.paragraphs(),
+      userId: faker.number.int({ min: 1, max: 10 })
     };
 
     const response = await ApiUtils.put<Post>(`${baseUrl}/posts/${postId}`, updatedData);
@@ -27,11 +28,11 @@ test.describe('PUT API Tests', () => {
     const userId = 1;
     const updatedUserData = {
       id: userId,
-      name: 'Updated User',
-      username: 'updateduser',
-      email: 'updated@example.com',
-      phone: '987-654-3210',
-      website: 'updateduser.com'
+      name: faker.person.fullName(),
+      username: faker.internet.userName(),
+      email: faker.internet.email(),
+      phone: faker.phone.number(),
+      website: faker.internet.domainName()
     };
 
     const response = await ApiUtils.put<User>(`${baseUrl}/users/${userId}`, updatedUserData);
@@ -47,7 +48,7 @@ test.describe('PUT API Tests', () => {
   test('should partially update a post with PATCH', async () => {
     const postId = 1;
     const partialUpdate = {
-      title: 'Partially Updated Title'
+      title: faker.lorem.sentence()
     };
 
     const response = await ApiUtils.patch<Post>(`${baseUrl}/posts/${postId}`, partialUpdate);

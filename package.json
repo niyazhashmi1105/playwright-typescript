@@ -14,7 +14,7 @@
     "post:test": "node scripts/post-test.js",
     "upload:dashboard": "node scripts/upload-dashboard.js",
     "pretest": "lsof -ti:9323 | xargs kill -9 || true",
-    "test:api": "npx playwright test tests/api/",
+    "test:api": "npx playwright test tests/api/ --workers=1",
     "test:all": "npx playwright test"
   },
   "keywords": [],
@@ -22,6 +22,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
     "@playwright/test": "^1.51.1",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.3",

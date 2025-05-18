@@ -1,15 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { ApiUtils } from '../../utils/api.utils';
 import { Post, User, Comment } from '../../utils/api.types';
+import { faker } from '@faker-js/faker';
 
 test.describe('POST API Tests', () => {
   const baseUrl = 'https://jsonplaceholder.typicode.com';
 
   test('should create a new post', async () => {
     const postData = {
-      title: 'Playwright API Testing',
-      body: 'This is a test post created with Axios in Playwright',
-      userId: 1
+      title: faker.lorem.sentence(),
+      body: faker.lorem.paragraphs(),
+      userId: faker.number.int({ min: 1, max: 10 })
     };
 
     const response = await ApiUtils.post<Post>(`${baseUrl}/posts`, postData);
@@ -24,17 +25,17 @@ test.describe('POST API Tests', () => {
 
   test('should create a new user', async () => {
     const userData = {
-      name: 'Test User',
-      username: 'testuser',
-      email: 'test@example.com',
+      name: faker.person.fullName(),
+      username: faker.internet.userName(),
+      email: faker.internet.email(),
       address: {
-        street: 'Test Street',
-        suite: 'Apt 123',
-        city: 'Testville',
-        zipcode: '12345'
+        street: faker.location.street(),
+        suite: faker.location.secondaryAddress(),
+        city: faker.location.city(),
+        zipcode: faker.location.zipCode()
       },
-      phone: '123-456-7890',
-      website: 'testuser.com'
+      phone: faker.phone.number(),
+      website: faker.internet.domainName()
     };
 
     const response = await ApiUtils.post<User>(`${baseUrl}/users`, userData);
@@ -48,10 +49,10 @@ test.describe('POST API Tests', () => {
 
   test('should create a comment on a post', async () => {
     const commentData = {
-      postId: 1,
-      name: 'Test Comment',
-      email: 'commenter@example.com',
-      body: 'This is a test comment on the post'
+      postId: faker.number.int({ min: 1, max: 100 }),
+      name: faker.lorem.sentence(),
+      email: faker.internet.email(),
+      body: faker.lorem.paragraph()
     };
 
     const response = await ApiUtils.post<Comment>(`${baseUrl}/comments`, commentData);
