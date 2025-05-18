@@ -14,6 +14,13 @@ class GrafanaUtils {
             const grafanaApiKey = process.env.GRAFANA_API_KEY;
 
             console.log('Connecting to Grafana at:', grafanaUrl);
+            
+            // Debug info - print API key presence (not the actual key)
+            if (grafanaApiKey) {
+                console.log('GRAFANA_API_KEY is available in environment');
+            } else {
+                console.log('Warning: GRAFANA_API_KEY is not available in environment');
+            }
 
             // Create alert payload with detailed test information
             const alertPayload = {
@@ -42,7 +49,19 @@ class GrafanaUtils {
             // Use API key auth in CI environment if available, otherwise fall back to basic auth
             let authHeader;
             if (process.env.CI && grafanaApiKey) {
-                authHeader = `Bearer ${grafanaApiKey}`;
+                // Format depends on whether it's a service account token (sa-) or API key
+                if (grafanaApiKey.startsWith('glsa_')) {
+                    // Service account token format
+                    authHeader = `Bearer ${grafanaApiKey}`;
+                } else if (grafanaApiKey.startsWith('eyJrIjoi')) {
+                    // Legacy API key format (starts with eyJrIjoi)
+                    authHeader = `Bearer ${grafanaApiKey}`;
+                } else {
+                    // Add Bearer prefix if not present
+                    authHeader = grafanaApiKey.startsWith('Bearer ') 
+                        ? grafanaApiKey 
+                        : `Bearer ${grafanaApiKey}`;
+                }
                 console.log('Using API key authentication for Grafana');
             } else {
                 authHeader = `Basic ${Buffer.from(`${grafanaUser}:${grafanaPassword}`).toString('base64')}`;
