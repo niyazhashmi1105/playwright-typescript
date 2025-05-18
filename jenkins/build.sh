@@ -28,6 +28,11 @@ npx playwright install
 echo "Running tests..."
 PLAYWRIGHT_HTML_REPORT=playwright-report npm run execute:tests || true
 
+# Generating Browserstack Report directory
+echo "Generating Browserstack report directory..."
+mkdir -p browserstack-report
+npx browserstack-node-sdk generate-report --output-dir browserstack-report
+
 # Set Jenkins-friendly permissions
 echo "Setting permissions..."
 chown -R 1000:1000 playwright-report test-results || true
