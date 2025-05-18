@@ -1,0 +1,11 @@
+{
+  "credentials": {
+    "username": "mdniyazhashmi_h1Ux6p",
+    "accessKey": "iTE5EC6uHJzsupUwszRC"
+  },
+  "localConfig": {
+    "localPath": "/var/jenkins_home/browserstack-local/BrowserStackLocal",
+    "localIdentifier": "jenkins-build-${BUILD_NUMBER}",
+    "localOptions": "--force-local --only-automate"
+  }
+}
