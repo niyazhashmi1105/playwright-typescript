@@ -31,7 +31,7 @@ platforms:
 browserstackLocal: true
 # Added local configuration to fix binary download issues
 localConfig:
-  binaryPath: /var/jenkins_home/browserstack-local
+  binaryPath: /var/jenkins_home/browserstack-local/BrowserStackLocal
   localIdentifier: jenkins-local
   forceLocal: true
   verbose: true
@@ -46,3 +46,4 @@ CUSTOM_TAG_1: "Playwright-Browserstack-Build"
 debug: true
 consoleLogs: info
 env_file: .env
+disableAutoCaptureLogs: true
