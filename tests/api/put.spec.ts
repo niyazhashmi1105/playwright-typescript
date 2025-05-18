@@ -29,7 +29,7 @@ test.describe('PUT API Tests', () => {
     const updatedUserData = {
       id: userId,
       name: faker.person.fullName(),
-      username: faker.internet.userName(),
+      username: faker.internet.username(),
       email: faker.internet.email(),
       phone: faker.phone.number(),
       website: faker.internet.domainName()

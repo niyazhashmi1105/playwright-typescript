@@ -26,7 +26,7 @@ test.describe('POST API Tests', () => {
   test('should create a new user', async () => {
     const userData = {
       name: faker.person.fullName(),
-      username: faker.internet.userName(),
+      username: faker.internet.username(),
       email: faker.internet.email(),
       address: {
         street: faker.location.street(),
