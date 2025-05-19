@@ -15,7 +15,7 @@
     "upload:dashboard": "node scripts/upload-dashboard.js",
     "pretest": "lsof -ti:9323 | xargs kill -9 || true",
     "test:api": "npx playwright test tests/api/ --workers=1",
-    "test:all": "npx playwright test"
+    "test:all": "npx playwright test test/ui/ --headed end2end.spec.ts && npx playwright test tests/api/ --workers=1"
   },
   "keywords": [],
   "author": "",
