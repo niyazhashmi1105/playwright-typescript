@@ -26,7 +26,7 @@ npx playwright install
 
 # Run tests
 echo "Running tests..."
-PLAYWRIGHT_HTML_REPORT=playwright-report npm run test:all || true
+PLAYWRIGHT_HTML_REPORT=playwright-report npm run test:ui || true
 
 # Generating Browserstack Report directory
 echo "Generating Browserstack report directory..."
