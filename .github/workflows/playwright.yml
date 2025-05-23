@@ -25,18 +25,18 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd "mysqladmin ping -h localhost -u root -proot"
+          --health-cmd "mysqladmin ping -h localhost -u root -p$root"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
     
     env:
       # Add MySQL environment variables
-      DB_HOST: localhost
-      DB_PORT: 3306
-      DB_USER: root
-      DB_PASSWORD: root
-      DB_NAME: emp_db
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
       # Existing env variables
       GRAFANA_URL: http://grafana:3000
       METRICS_PORT: 9090
