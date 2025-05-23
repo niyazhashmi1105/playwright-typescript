@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     
-    # Add MySQL service container
+    # MySQL service without the network specification
     services:
       mysql:
         image: mysql:8.0
@@ -29,8 +29,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          --name mysql
-          --network monitoring-network
     
     env:
       # Add MySQL environment variables
@@ -67,6 +65,11 @@ jobs:
       run: docker network create monitoring-network
       timeout-minutes: 2
 
+    # Connect MySQL to the network after it's created
+    - name: Connect MySQL to network
+      run: docker network connect monitoring-network $(docker ps -q --filter "name=mysql")
+      timeout-minutes: 1
+
     # Add MySQL initialization step
     - name: Initialize MySQL Database
       run: |
@@ -76,7 +79,7 @@ jobs:
         
         # Create manager table with foreign key relationship
         mysql -h127.0.0.1 -P3306 -uroot -proot emp_db 
-        #<<SQL
+        # <<SQL
         #   CREATE TABLE IF NOT EXISTS emp (
         #     id INT PRIMARY KEY AUTO_INCREMENT,
         #     name VARCHAR(100) NOT NULL,
@@ -91,7 +94,7 @@ jobs:
         #     manages_emp_id INT,
         #     FOREIGN KEY (manages_emp_id) REFERENCES emp(id)
         #   );
-        # SQL
+
       timeout-minutes: 2
 
     - name: Setup Prometheus
