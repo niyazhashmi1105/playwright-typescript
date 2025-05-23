@@ -261,7 +261,7 @@ jobs:
         export CI=1
         
         # Run tests with multiple workers for better performance
-        npm run test:accessibility
+        npm run test:ui
       timeout-minutes: 30
       
     - name: Generate Allure Report
