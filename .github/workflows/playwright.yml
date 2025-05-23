@@ -78,22 +78,26 @@ jobs:
         sleep 10
         
         # Create manager table with foreign key relationship
-        mysql -h127.0.0.1 -P3306 -uroot -proot emp_db 
-        # <<SQL
-        #   CREATE TABLE IF NOT EXISTS emp (
-        #     id INT PRIMARY KEY AUTO_INCREMENT,
-        #     name VARCHAR(100) NOT NULL,
-        #     age INT NOT NULL,
-        #     email VARCHAR(100) NOT NULL,
-        #     UNIQUE KEY unique_email (email)
-        #   );
+        mysql -h127.0.0.1 -P3306 -uroot -proot emp_db <<SQL
+          CREATE TABLE IF NOT EXISTS emp (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(100) NOT NULL,
+            age INT NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            UNIQUE KEY unique_email (email)
+          );
           
-        #   CREATE TABLE IF NOT EXISTS manager (
-        #     id INT PRIMARY KEY AUTO_INCREMENT,
-        #     name VARCHAR(100) NOT NULL,
-        #     manages_emp_id INT,
-        #     FOREIGN KEY (manages_emp_id) REFERENCES emp(id)
-        #   );
+          CREATE TABLE IF NOT EXISTS manager (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(100) NOT NULL,
+            employee_id VARCHAR(20) UNIQUE,
+            email VARCHAR(100),
+            department VARCHAR(50),
+            hire_date DATE,
+            salary DECIMAL(10,2),
+            manages_emp_id INT,
+            FOREIGN KEY (manages_emp_id) REFERENCES emp(id)
+          );
 
       timeout-minutes: 2
 

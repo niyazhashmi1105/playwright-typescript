@@ -17,7 +17,8 @@
     "test:api": "npx playwright test tests/api/ --workers=1",
     "test:ui": "npx playwright test tests/ui/ --workers=1",
     "test:all": "npx playwright test tests/ui/ && npx playwright test tests/api/ --workers=1",
-    "test:db":"npx playwright test tests/db/*.spec.ts --project chromium"
+    "test:db":"npx playwright test tests/db/*.spec.ts --project chromium",
+    "test:accessibility":"npx playwright test tests/accessibility/*.spec.ts --project chromium"
   },
   "keywords": [],
   "author": "",
