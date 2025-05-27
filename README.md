@@ -72,8 +72,7 @@ playwright-typescript/
 ├── tsconfig.json             # TypeScript configuration
 ├── docker-compose.yml        # Docker services configuration
 ├── docker-compose.override.yml # Docker override configuration
-├── azure-pipelines.yml       # Azure DevOps pipeline configuration
-├── browserstack.yml          # BrowserStack configuration
+├── azure-pipelines.yml       # BrowserStack configuration
 ├── fixed-prometheus-init.groovy # Jenkins Prometheus initialization script
 └── browserstack-jenkins-config.json # BrowserStack Jenkins integration
 ```
@@ -132,6 +131,13 @@ CI=false  # Set to true in CI environments
 
 # Metrics Configuration
 METRICS_PORT=9324
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=emp_db
 ```
 
 ### 3. Monitoring Stack Setup
@@ -490,45 +496,211 @@ test('API should return user data', async ({ request }) => {
 });
 ```
 
-## Troubleshooting
+## Database Integration
 
-### Common Issues and Solutions
+This framework includes database testing capabilities with MySQL integration. Database tests allow you to validate data integrity, perform CRUD operations, and ensure database constraints are working as expected.
 
-1. **Monitoring connection issues:**
-   - Ensure Docker containers are running: `docker-compose ps`
-   - Check container logs: `docker-compose logs prometheus`
-   - Verify network connectivity between containers
-   - Check METRICS_PORT environment variable is set correctly
+### Database Setup
 
-2. **Email notification failures:**
-   - Verify SMTP settings in .env file
-   - Check if app password is correct for Gmail
-   - Review logs for email sending errors
+#### Local Development Environment
 
-3. **Jenkins integration problems:**
-   - Ensure Jenkins container can reach other services
-   - Verify Jenkins has required plugins installed
-   - Check Jenkins pipeline execution logs
-   - Verify the Prometheus endpoint is correctly configured via the groovy script
+1. **Install MySQL** (version 8.0 recommended)
+   ```bash
+   # For Ubuntu/Debian
+   sudo apt-get install mysql-server
 
-4. **Test failure alerts not triggering:**
-   - Verify AlertManager configuration
-   - Check Prometheus targets are up
-   - Review alert rules in Grafana
+   # For macOS with Homebrew
+   brew install mysql
 
-5. **BrowserStack connectivity issues:**
-   - Check BrowserStack credentials in .env file
-   - Verify BrowserStack local testing connection
-   - Review browserstack-node-sdk logs
+   # For Windows
+   # Download and install from https://dev.mysql.com/downloads/mysql/
+   ```
 
-## Contributing
+2. **Create a database**
+   ```bash
+   mysql -u root -p
+   CREATE DATABASE emp_db;
+   ```
 
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+3. **Create tables**
+   ```sql
+   USE emp_db;
 
-## License
+   CREATE TABLE IF NOT EXISTS emp (
+     id INT PRIMARY KEY AUTO_INCREMENT,
+     name VARCHAR(100) NOT NULL,
+     age INT NOT NULL,
+     email VARCHAR(100) NOT NULL,
+     UNIQUE KEY unique_email (email)
+   );
+   
+   CREATE TABLE IF NOT EXISTS manager (
+     id INT PRIMARY KEY AUTO_INCREMENT,
+     name VARCHAR(100) NOT NULL,
+     employee_id VARCHAR(20) UNIQUE,
+     email VARCHAR(100),
+     department VARCHAR(50),
+     hire_date DATE,
+     salary DECIMAL(10,2),
+     manages_emp_id INT,
+     FOREIGN KEY (manages_emp_id) REFERENCES emp(id)
+   );
+   ```
 
-ISC License
+#### CI Environment
+
+The framework uses MySQL service in GitHub Actions workflow:
+
+```yaml
+services:
+  mysql:
+    image: mysql:8.0
+    env:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: emp_db
+    ports:
+      - 3306:3306
+    options: >-
+      --health-cmd "mysqladmin ping -h localhost -u root -proot"
+      --health-interval 10s
+      --health-timeout 5s
+      --health-retries 5
+```
+
+### Database Configuration
+
+Database connection parameters are defined in `.env` file:
+
+```env
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=emp_db
+```
+
+The database utility module (`utils/db-utils.ts`) handles database connections and operations:
+
+```typescript
+// MySQL connection configuration
+const dbConfig = {
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '3306'),
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'emp_db',
+  connectTimeout: 60000
+};
+```
+
+### Database Testing
+
+The framework provides comprehensive database operation utilities in `utils/db-utils.ts`:
+
+- `executeQuery()`: Run raw SQL queries
+- `insertRecord()`: Insert data into tables
+- `selectRecords()`: Retrieve data with optional filters
+- `updateRecords()`: Update table records
+- `deleteRecords()`: Delete records
+- `executeTransaction()`: Execute multiple operations in a transaction
+
+#### Example Database Test
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { faker } from '@faker-js/faker';
+import {
+    initPool,
+    closePool,
+    executeQuery,
+    insertRecord,
+    selectRecords
+} from '../../utils/db-utils';
+
+// Define interface for employee data
+interface Employee {
+    id?: number;
+    name: string;
+    age: number;
+    email: string;
+}
+
+test.describe('MySQL Database Operations', () => {
+    test.beforeAll(async () => {
+        // Initialize connection pool
+        await initPool();
+    });
+
+    test.afterAll(async () => {
+        // Close connection pool
+        await closePool();
+    });
+
+    test('should insert and retrieve employee records', async () => {
+        // Arrange: Create test data
+        const empData: Employee = {
+            name: faker.person.fullName(),
+            age: faker.number.int({ min: 18, max: 65 }),
+            email: faker.internet.email()
+        };
+
+        // Act: Insert record
+        const result = await insertRecord('emp', empData);
+        
+        // Assert: Verify insertion
+        expect(result.affectedRows).toBe(1);
+        
+        // Act: Retrieve inserted record
+        const employees = await selectRecords<Employee>(
+            'emp', 
+            ['*'], 
+            'email = ?', 
+            [empData.email]
+        );
+        
+        // Assert: Verify retrieval
+        expect(employees.length).toBe(1);
+        expect(employees[0].name).toBe(empData.name);
+        expect(employees[0].age).toBe(empData.age);
+    });
+});
+```
+
+### Running Database Tests
+
+To run database tests:
+
+```bash
+# Run all database tests
+npx playwright test tests/db/
+
+# Run a specific database test file
+npx playwright test tests/db/db-operations.spec.ts
+```
+
+### Troubleshooting Database Tests
+
+1. **Connection Issues**
+   - Verify MySQL service is running
+   - Check credentials in `.env` file
+   - Confirm database and tables exist
+   - Check network connectivity to database host
+
+2. **Permission Issues**
+   - Ensure the database user has appropriate permissions
+   - Verify schema permissions for the tables
+
+3. **Concurrency Problems**
+   - Use transactions for test isolation
+   - Reset database state between test runs
+
+4. **CI/CD Pipeline Failures**
+   - Check database service health in GitHub Actions
+   - Verify database initialization completed successfully
+
+5. **Performance Issues**
+   - Use connection pooling (already implemented)
+   - Optimize queries for performance
+   - Consider using database mocking for faster tests
+````
